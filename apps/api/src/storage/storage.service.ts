@@ -54,13 +54,9 @@ export class StorageService implements OnModuleInit {
       'scholarship-docs';
     this.localUploadDir = this.resolveLocalUploadDir();
 
-    if (blobToken || blobStoreId) {
+    if (blobToken && blobToken.trim() !== '') {
       this.backend = 'blob';
-      this.logger.log(
-        blobToken
-          ? 'Using Vercel Blob storage (token auth)'
-          : 'Using Vercel Blob storage (OIDC zero-config auth)',
-      );
+      this.logger.log('Using Vercel Blob storage (token auth)');
       return;
     }
 
