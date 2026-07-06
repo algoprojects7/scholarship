@@ -142,10 +142,23 @@ export class StorageService implements OnModuleInit {
     }
 
     if (this.backend === 'blob') {
+      const token =
+        this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
+        process.env.BLOB_READ_WRITE_TOKEN;
+      const storeId =
+        this.configService.get<string>('BLOB_STORE_ID') ??
+        process.env.BLOB_STORE_ID;
+      const oidcToken =
+        this.configService.get<string>('VERCEL_OIDC_TOKEN') ??
+        process.env.VERCEL_OIDC_TOKEN;
+
       const blob = await put(key, file, {
         access: 'public',
         addRandomSuffix: false,
         contentType,
+        ...(token ? { token } : {}),
+        ...(storeId ? { storeId } : {}),
+        ...(oidcToken ? { oidcToken } : {}),
       });
       return blob.url;
     }
@@ -235,7 +248,24 @@ export class StorageService implements OnModuleInit {
 
     if (this.backend === 'blob') {
       const downloadUrl = await this.getBlobDownloadUrl(fileRef);
-      const response = await fetch(downloadUrl);
+      const token =
+        this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
+        process.env.BLOB_READ_WRITE_TOKEN;
+      const storeId =
+        this.configService.get<string>('BLOB_STORE_ID') ??
+        process.env.BLOB_STORE_ID;
+      const oidcToken =
+        this.configService.get<string>('VERCEL_OIDC_TOKEN') ??
+        process.env.VERCEL_OIDC_TOKEN;
+
+      const headers = new Headers();
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      } else if (oidcToken) {
+        headers.set('Authorization', `Bearer ${oidcToken}`);
+      }
+
+      const response = await fetch(downloadUrl, { headers });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch blob file (${response.status})`);
