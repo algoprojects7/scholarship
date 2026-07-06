@@ -28,13 +28,26 @@ export class StorageService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {}
 
   async onModuleInit(): Promise<void> {
-    const blobToken = this.configService.get<string>('BLOB_READ_WRITE_TOKEN');
-    const accessKey = this.configService.get<string>('S3_ACCESS_KEY');
-    const secretKey = this.configService.get<string>('S3_SECRET_KEY');
-    const endpoint = this.configService.get<string>('S3_ENDPOINT');
-    const region = this.configService.get<string>('S3_REGION', 'us-east-1');
+    const blobToken =
+      this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
+      process.env.BLOB_READ_WRITE_TOKEN;
+    const accessKey =
+      this.configService.get<string>('S3_ACCESS_KEY') ??
+      process.env.S3_ACCESS_KEY;
+    const secretKey =
+      this.configService.get<string>('S3_SECRET_KEY') ??
+      process.env.S3_SECRET_KEY;
+    const endpoint =
+      this.configService.get<string>('S3_ENDPOINT') ??
+      process.env.S3_ENDPOINT;
+    const region =
+      this.configService.get<string>('S3_REGION') ??
+      process.env.S3_REGION ??
+      'us-east-1';
     this.bucket =
-      this.configService.get<string>('S3_BUCKET') ?? 'scholarship-docs';
+      this.configService.get<string>('S3_BUCKET') ??
+      process.env.S3_BUCKET ??
+      'scholarship-docs';
     this.localUploadDir = this.resolveLocalUploadDir();
 
     if (blobToken) {
@@ -185,21 +198,11 @@ export class StorageService implements OnModuleInit {
       throw new Error('Blob download URLs are only available in blob mode');
     }
 
-    try {
-      const metadata = await head(blobUrl);
-      return metadata.downloadUrl;
-    } catch (err) {
-      if (!blobUrl.startsWith('http')) {
-        try {
-          const publicUrl = await this.resolveBlobPublicUrl(blobUrl);
-          const metadata = await head(publicUrl);
-          return metadata.downloadUrl;
-        } catch {
-          // ignore
-        }
-      }
-      throw err;
+    if (!blobUrl.startsWith('http')) {
+      throw new Error('Local relative paths are not available on Vercel Blob');
     }
+
+    return blobUrl;
   }
 
   async resolveBlobPublicUrl(fileRef: string): Promise<string> {
@@ -211,27 +214,7 @@ export class StorageService implements OnModuleInit {
       return fileRef;
     }
 
-    try {
-      const metadata = await head(fileRef);
-      return metadata.url;
-    } catch (err) {
-      try {
-        const lastSlash = fileRef.lastIndexOf('/');
-        const prefix = lastSlash !== -1 ? fileRef.substring(0, lastSlash + 1) : '';
-        const response = await list({ prefix });
-        
-        const found = response.blobs.find(b => 
-          b.pathname === fileRef || 
-          b.pathname.startsWith(fileRef.replace(/\.[^/.]+$/, ''))
-        );
-        if (found) {
-          return found.url;
-        }
-      } catch (listErr) {
-        this.logger.error(`Failed to list blobs for fallback of ${fileRef}:`, listErr);
-      }
-      throw err;
-    }
+    throw new Error('Local relative paths are not available on Vercel Blob');
   }
 
   async fetchFileContent(

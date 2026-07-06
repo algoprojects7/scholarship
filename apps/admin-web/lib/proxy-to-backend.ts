@@ -49,6 +49,7 @@ export async function proxyToBackend(
     method: request.method,
     headers,
     cache: "no-store",
+    redirect: "manual",
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -56,6 +57,25 @@ export async function proxyToBackend(
   }
 
   const response = await fetch(targetUrl, init);
+
+  if (response.status >= 300 && response.status < 400) {
+    const location = response.headers.get("location");
+    if (location) {
+      const redirectHeaders = new Headers();
+      redirectHeaders.set("location", location);
+
+      const setCookie = response.headers.get("set-cookie");
+      if (setCookie) {
+        redirectHeaders.set("set-cookie", rewriteSetCookieForFrontend(setCookie));
+      }
+
+      return new NextResponse(null, {
+        status: response.status,
+        headers: redirectHeaders,
+      });
+    }
+  }
+
   const body = await response.arrayBuffer();
 
   const responseHeaders = new Headers();
