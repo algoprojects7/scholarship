@@ -238,8 +238,29 @@ async function openDocumentPreviewRequest(
     throw new ApiError(message, response.status);
   }
 
+  const contentType =
+    response.headers.get("content-type") ?? "application/octet-stream";
   const blob = await response.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  window.open(objectUrl, "_blank", "noopener,noreferrer");
-  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+
+  if (blob.size === 0) {
+    throw new ApiError("Document file is empty or unavailable", 404);
+  }
+
+  const typedBlob =
+    blob.type && blob.type !== "application/octet-stream"
+      ? blob
+      : new Blob([blob], { type: contentType });
+
+  const objectUrl = URL.createObjectURL(typedBlob);
+  const previewWindow = window.open(objectUrl, "_blank");
+
+  if (!previewWindow) {
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.click();
+  }
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 120_000);
 }

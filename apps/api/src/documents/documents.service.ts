@@ -182,7 +182,7 @@ export class DocumentsService {
       throw new NotFoundException('Document not found');
     }
 
-    return this.buildPreviewResult(document);
+    return this.buildAdminPreviewResult(document);
   }
 
   private async buildPreviewResult(document: {
@@ -201,6 +201,33 @@ export class DocumentsService {
 
     const url = await this.storageService.getSignedUrl(document.fileUrl);
     return { mode: 'redirect' as const, url };
+  }
+
+  private async buildAdminPreviewResult(document: {
+    fileUrl: string;
+    mimeType: string | null;
+    fileName: string;
+  }) {
+    const mimeType = document.mimeType ?? 'application/octet-stream';
+
+    if (this.storageService.isLocalStorage()) {
+      return {
+        mode: 'local' as const,
+        filePath: this.storageService.getLocalFilePath(document.fileUrl),
+        mimeType,
+        fileName: document.fileName,
+      };
+    }
+
+    const { buffer, contentType } =
+      await this.storageService.fetchFileContent(document.fileUrl);
+
+    return {
+      mode: 'buffer' as const,
+      buffer,
+      mimeType: contentType || mimeType,
+      fileName: document.fileName,
+    };
   }
 
   private async assertCanUploadDocuments(

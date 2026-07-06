@@ -42,15 +42,17 @@ export class AdminDocumentsController {
   ) {
     const result = await this.documentsService.getAdminPreviewUrl(id);
 
-    if (result.mode === 'redirect') {
-      return res.redirect(result.url);
-    }
-
     res.setHeader('Content-Type', result.mimeType);
     res.setHeader(
       'Content-Disposition',
-      `inline; filename="${result.fileName}"`,
+      `inline; filename="${result.fileName.replace(/"/g, '')}"`,
     );
+
+    if (result.mode === 'buffer') {
+      res.setHeader('Content-Length', String(result.buffer.length));
+      return res.send(result.buffer);
+    }
+
     createReadStream(result.filePath).pipe(res);
   }
 

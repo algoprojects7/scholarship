@@ -64,6 +64,16 @@ export async function proxyToBackend(
     responseHeaders.set("content-type", contentType);
   }
 
+  const contentDisposition = response.headers.get("content-disposition");
+  if (contentDisposition) {
+    responseHeaders.set("content-disposition", contentDisposition);
+  }
+
+  const contentLength = response.headers.get("content-length");
+  if (contentLength) {
+    responseHeaders.set("content-length", contentLength);
+  }
+
   const setCookie = response.headers.get("set-cookie");
   if (setCookie) {
     responseHeaders.set("set-cookie", rewriteSetCookieForFrontend(setCookie));
