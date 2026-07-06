@@ -1,0 +1,34 @@
+{
+  "name": "scholarship",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev --filter=@scholarship/api --filter=@scholarship/web --filter=@scholarship/admin-web",
+    "dev:web": "turbo dev --filter=@scholarship/web",
+    "dev:web:fresh": "pnpm --filter @scholarship/web dev:fresh",
+    "dev:admin": "turbo dev --filter=@scholarship/admin-web",
+    "dev:api": "turbo dev --filter=@scholarship/api",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "db:generate": "turbo db:generate --filter=@scholarship/database",
+    "db:migrate": "turbo db:migrate --filter=@scholarship/database",
+    "db:push": "turbo db:push --filter=@scholarship/database",
+    "db:seed": "turbo db:seed --filter=@scholarship/database",
+    "db:migrate:deploy": "turbo db:migrate:deploy --filter=@scholarship/database",
+    "postinstall": "pnpm run db:generate",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
+    "test:load": "k6 run load-tests/health.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@prisma/client": "6.1.0",
+    "prisma": "6.1.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+package-lock.json
+pnpm-debug.log*
+
+# Build
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Turbo
+.turbo/
+
+# Prisma
+packages/database/prisma/migrations/**/migration_lock.toml
+
+# Docs
+docs/
+
+# Backups
+backups/
+
+# Test
+coverage/
+playwright-report/
+test-results/

@@ -1,0 +1,21 @@
+# Example Prometheus alert rules for Scholarship API monitoring.
+# Point your scraper at GET /health/ready on the API service.
+
+groups:
+  - name: scholarship-api
+    rules:
+      - alert: ScholarshipApiDown
+        expr: up{job="scholarship-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Scholarship API is unreachable
+
+      - alert: ScholarshipApiDegraded
+        expr: scholarship_health_ready != 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Scholarship API readiness degraded (DB or Redis)
