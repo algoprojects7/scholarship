@@ -7,6 +7,7 @@ import {
   Patch,
   Res,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { Permission, UserRole } from '@scholarship/shared';
 import type { Response } from 'express';
@@ -63,7 +64,19 @@ export class AdminDocumentsController {
       return res.send(result.buffer);
     }
 
-    createReadStream(result.filePath).pipe(res);
+    const filePath = result.filePath;
+    const { existsSync } = await import('fs');
+    if (!existsSync(filePath)) {
+      throw new NotFoundException('Local document file is not found. It may have expired or is unavailable on this server.');
+    }
+
+    const stream = createReadStream(filePath);
+    stream.on('error', (err) => {
+      if (!res.headersSent) {
+        res.status(500).send('Error reading or streaming document');
+      }
+    });
+    stream.pipe(res);
   }
 
   @Patch(':id/verify')

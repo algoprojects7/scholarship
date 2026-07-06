@@ -5,7 +5,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { del, head, put } from '@vercel/blob';
+import { del, head, list, put } from '@vercel/blob';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { mkdir, unlink, writeFile } from 'fs/promises';
@@ -185,8 +185,21 @@ export class StorageService implements OnModuleInit {
       throw new Error('Blob download URLs are only available in blob mode');
     }
 
-    const metadata = await head(blobUrl);
-    return metadata.downloadUrl;
+    try {
+      const metadata = await head(blobUrl);
+      return metadata.downloadUrl;
+    } catch (err) {
+      if (!blobUrl.startsWith('http')) {
+        try {
+          const publicUrl = await this.resolveBlobPublicUrl(blobUrl);
+          const metadata = await head(publicUrl);
+          return metadata.downloadUrl;
+        } catch {
+          // ignore
+        }
+      }
+      throw err;
+    }
   }
 
   async resolveBlobPublicUrl(fileRef: string): Promise<string> {
@@ -198,8 +211,27 @@ export class StorageService implements OnModuleInit {
       return fileRef;
     }
 
-    const metadata = await head(fileRef);
-    return metadata.url;
+    try {
+      const metadata = await head(fileRef);
+      return metadata.url;
+    } catch (err) {
+      try {
+        const lastSlash = fileRef.lastIndexOf('/');
+        const prefix = lastSlash !== -1 ? fileRef.substring(0, lastSlash + 1) : '';
+        const response = await list({ prefix });
+        
+        const found = response.blobs.find(b => 
+          b.pathname === fileRef || 
+          b.pathname.startsWith(fileRef.replace(/\.[^/.]+$/, ''))
+        );
+        if (found) {
+          return found.url;
+        }
+      } catch (listErr) {
+        this.logger.error(`Failed to list blobs for fallback of ${fileRef}:`, listErr);
+      }
+      throw err;
+    }
   }
 
   async fetchFileContent(

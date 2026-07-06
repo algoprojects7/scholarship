@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentType, UserRole } from '@scholarship/shared';
@@ -110,6 +111,19 @@ export class DocumentsController {
       'Content-Disposition',
       `inline; filename="${result.fileName}"`,
     );
-    createReadStream(result.filePath).pipe(res);
+
+    const filePath = result.filePath;
+    const { existsSync } = await import('fs');
+    if (!existsSync(filePath)) {
+      throw new NotFoundException('Local document file is not found. It may have expired or is unavailable on this server.');
+    }
+
+    const stream = createReadStream(filePath);
+    stream.on('error', (err) => {
+      if (!res.headersSent) {
+        res.status(500).send('Error reading or streaming document');
+      }
+    });
+    stream.pipe(res);
   }
 }
