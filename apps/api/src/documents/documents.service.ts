@@ -98,7 +98,13 @@ export class DocumentsService {
     documentType: DocumentType,
     file: Express.Multer.File,
   ) {
-    if (this.storageService.isLocalStorage() && process.env.VERCEL === '1') {
+    const isServerless =
+      process.env.VERCEL === '1' ||
+      process.env.NOW_BUILDER === '1' ||
+      !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      !!process.env.VERCEL_ENV;
+
+    if (this.storageService.isLocalStorage() && isServerless) {
       throw new HttpException(
         {
           message:

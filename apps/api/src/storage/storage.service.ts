@@ -136,7 +136,13 @@ export class StorageService implements OnModuleInit {
       return configured;
     }
 
-    if (process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const isServerless =
+      process.env.VERCEL === '1' ||
+      process.env.NOW_BUILDER === '1' ||
+      !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      !!process.env.VERCEL_ENV;
+
+    if (isServerless) {
       return join('/tmp', 'uploads');
     }
 

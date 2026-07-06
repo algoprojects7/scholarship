@@ -48,10 +48,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         };
         message = resp.message ?? exception.message;
       }
-    } else if (
-      process.env.NODE_ENV !== 'production' &&
-      exception instanceof Error
-    ) {
+    } else if (exception instanceof Error) {
       message = exception.message;
     }
 
@@ -80,11 +77,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     }
 
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      exception instanceof Error &&
-      exception.stack
-    ) {
+    if (exception instanceof Error && exception.stack) {
       body.stack = exception.stack;
     }
 
