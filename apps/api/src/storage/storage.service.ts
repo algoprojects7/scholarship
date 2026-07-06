@@ -180,12 +180,19 @@ export class StorageService implements OnModuleInit {
       const storeId =
         this.configService.get<string>('BLOB_STORE_ID') ??
         process.env.BLOB_STORE_ID;
+      const accessInput =
+        this.configService.get<string>('BLOB_ACCESS') ??
+        process.env.BLOB_ACCESS ??
+        'public';
+      const access = accessInput === 'private' ? 'private' : 'public';
 
-      this.logger.log(`Uploading blob. Key: ${key}. Has token: ${!!token}. Has storeId: ${!!storeId}`);
+      this.logger.log(
+        `Uploading blob. Key: ${key}. Access: ${access}. Has token: ${!!token}. Has storeId: ${!!storeId}`,
+      );
 
       try {
         const blob = await put(key, file, {
-          access: 'public',
+          access: access as any,
           addRandomSuffix: false,
           contentType,
           ...(token ? { token } : {}),
