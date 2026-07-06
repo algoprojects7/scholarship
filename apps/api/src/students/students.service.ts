@@ -234,15 +234,15 @@ export class StudentsService {
       throw new NotFoundException('Profile photo not found');
     }
 
-    if (this.storageService.isLocalStorage()) {
-      const extension = extname(profile.avatarUrl).toLowerCase();
-      const mimeType =
-        extension === '.png'
-          ? 'image/png'
-          : extension === '.jpg' || extension === '.jpeg'
-            ? 'image/jpeg'
-            : 'application/octet-stream';
+    const extension = extname(profile.avatarUrl).toLowerCase();
+    const mimeType =
+      extension === '.png'
+        ? 'image/png'
+        : extension === '.jpg' || extension === '.jpeg'
+          ? 'image/jpeg'
+          : 'application/octet-stream';
 
+    if (this.storageService.isLocalStorage()) {
       return {
         mode: 'local' as const,
         filePath: this.storageService.getLocalFilePath(profile.avatarUrl),
@@ -250,8 +250,15 @@ export class StudentsService {
       };
     }
 
-    const url = await this.storageService.getSignedUrl(profile.avatarUrl);
-    return { mode: 'redirect' as const, url };
+    const { buffer, contentType } = await this.storageService.fetchFileContent(
+      profile.avatarUrl,
+    );
+
+    return {
+      mode: 'buffer' as const,
+      buffer,
+      mimeType: contentType || mimeType,
+    };
   }
 
   private validateAvatarFile(file: Express.Multer.File): void {

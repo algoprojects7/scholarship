@@ -1,8 +1,8 @@
 import { IsEnum, IsString, MinLength, ValidateIf } from 'class-validator';
 
 export enum ApplicationDecision {
-  APPROVE = 'APPROVE',
-  REJECT = 'REJECT',
+  APPROVE = 'APPROVED',
+  REJECT = 'REJECTED',
 }
 
 export class ApplicationDecisionDto {

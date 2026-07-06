@@ -99,27 +99,18 @@ export class StudentsController {
 
 
   @Get('profile/avatar')
-
   async getAvatar(@CurrentUser() user: AuthUser, @Res() res: Response) {
-
     const result = await this.studentsService.getAvatar(user.id);
 
-
-
-    if (result.mode === 'redirect') {
-
-      return res.redirect(result.url);
-
+    if (result.mode === 'buffer') {
+      res.setHeader('Content-Type', result.mimeType);
+      res.setHeader('Cache-Control', 'private, max-age=300');
+      return res.send(result.buffer);
     }
 
-
-
     res.setHeader('Content-Type', result.mimeType);
-
     res.setHeader('Cache-Control', 'private, max-age=300');
-
     createReadStream(result.filePath).pipe(res);
-
   }
 
 }
