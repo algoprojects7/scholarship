@@ -1,6 +1,5 @@
 const path = require('path');
 const moduleLib = require('module');
-const serverlessExpress = require('@vendia/serverless-express');
 
 const apiRoot = path.join(__dirname, '..');
 const repoRoot = path.join(__dirname, '../..');
@@ -10,21 +9,20 @@ moduleLib.globalPaths.push(
   path.join(repoRoot, 'node_modules'),
 );
 
-/** @type {import('@vendia/serverless-express').Handler | undefined} */
-let cachedHandler;
+/** @type {import('express').Express | undefined} */
+let cachedExpressApp;
 
 /** @type {import('@vercel/node').VercelApiHandler} */
 module.exports = async (req, res) => {
   try {
-    if (!cachedHandler) {
+    if (!cachedExpressApp) {
       const { createApp } = require(path.join(apiRoot, 'dist/create-app'));
       const nestApp = await createApp();
       await nestApp.init();
-      const expressApp = nestApp.getHttpAdapter().getInstance();
-      cachedHandler = serverlessExpress({ app: expressApp });
+      cachedExpressApp = nestApp.getHttpAdapter().getInstance();
     }
 
-    return cachedHandler(req, res);
+    return cachedExpressApp(req, res);
   } catch (error) {
     console.error('API bootstrap failed:', error);
 
