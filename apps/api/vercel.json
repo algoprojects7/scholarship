@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "framework": null,
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile --prod=false",
-  "buildCommand": "cd ../.. && pnpm run db:generate && pnpm run build --filter=@scholarship/api",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "outputDirectory": "public",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile --prod=false && pnpm run db:generate && pnpm run build --filter=@scholarship/api",
+  "builds": [{ "src": "api/index.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "api/index.js" }]
 }
