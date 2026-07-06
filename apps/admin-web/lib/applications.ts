@@ -6,8 +6,7 @@ import {
 } from "@scholarship/shared";
 import { ApiError, apiFetch } from "./api";
 import { getAccessToken } from "./auth";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import { getApiBaseUrl } from "./resolve-api-base";
 const adminPortal = { auth: true, portal: "admin" as const };
 
 export interface PersonalDetails {
@@ -200,13 +199,32 @@ export function verifyDocument(id: string, payload: VerifyDocumentPayload) {
 }
 
 export async function openDocumentPreview(documentId: string): Promise<void> {
+  await openDocumentPreviewRequest(documentId, false);
+}
+
+async function openDocumentPreviewRequest(
+  documentId: string,
+  retried: boolean,
+): Promise<void> {
   const token = getAccessToken();
-  const response = await fetch(`${API_URL}/documents/${documentId}/preview`, {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      "X-Portal": "admin",
+  const response = await fetch(
+    `${getApiBaseUrl()}/admin/documents/${documentId}/preview`,
+    {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        "X-Portal": "admin",
+      },
+      credentials: "include",
     },
-  });
+  );
+
+  if (response.status === 401 && !retried) {
+    const { refreshAccessToken } = await import("./auth");
+    const refreshed = await refreshAccessToken("admin");
+    if (refreshed) {
+      return openDocumentPreviewRequest(documentId, true);
+    }
+  }
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));

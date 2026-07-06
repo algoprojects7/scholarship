@@ -6,5 +6,6 @@ import { DocumentsService } from './documents.service';
 @Module({
   controllers: [DocumentsController],
   providers: [DocumentsService, ApplicationOwnerGuard],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {}

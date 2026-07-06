@@ -1,8 +1,7 @@
 import { ApplicationStatus } from "@scholarship/shared";
 import { ApiError } from "./api";
 import { getAccessToken } from "./auth";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import { getApiBaseUrl } from "./resolve-api-base";
 
 export type ReportFormat = "pdf" | "xlsx";
 
@@ -91,7 +90,7 @@ export async function exportReport(params: ExportReportParams): Promise<void> {
 
   const token = getAccessToken();
   const response = await fetch(
-    `${API_URL}/admin/reports/export?${searchParams.toString()}`,
+    `${getApiBaseUrl()}/admin/reports/export?${searchParams.toString()}`,
     {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

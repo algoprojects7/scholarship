@@ -23,12 +23,49 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AuthUser } from '../auth/interfaces/auth-user.interface';
 import { DocumentsService } from './documents.service';
+import { ConfirmDocumentDto } from './dto/confirm-document.dto';
+import { PresignDocumentDto } from './dto/presign-document.dto';
 
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.STUDENT)
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
+
+  @Post('applications/:applicationId/documents/presign')
+  @UseGuards(ApplicationOwnerGuard)
+  presignUpload(
+    @Param('applicationId', ParseUUIDPipe) applicationId: string,
+    @CurrentUser() user: AuthUser,
+    @Body() body: PresignDocumentDto,
+  ) {
+    return this.documentsService.createPresignedUpload(
+      applicationId,
+      user.id,
+      body.documentType,
+      body.fileName,
+      body.contentType,
+      body.fileSize,
+    );
+  }
+
+  @Post('applications/:applicationId/documents/confirm')
+  @UseGuards(ApplicationOwnerGuard)
+  confirmUpload(
+    @Param('applicationId', ParseUUIDPipe) applicationId: string,
+    @CurrentUser() user: AuthUser,
+    @Body() body: ConfirmDocumentDto,
+  ) {
+    return this.documentsService.confirmUpload(
+      applicationId,
+      user.id,
+      body.documentType,
+      body.key,
+      body.fileName,
+      body.fileSize,
+      body.mimeType,
+    );
+  }
 
   @Post('applications/:applicationId/documents')
   @UseGuards(ApplicationOwnerGuard)

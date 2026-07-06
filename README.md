@@ -140,6 +140,16 @@ Workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)
 - Run `pnpm run db:migrate:deploy` before starting the API in production.
 - Backup scripts are available in `scripts/` for PostgreSQL.
 
+### Deploy to Vercel
+
+Step-by-step guide for Prisma Postgres, API, student web, and admin web:
+
+**[deploy/vercel.md](deploy/vercel.md)**
+
+**Testing uploads (easiest):** [deploy/vercel-blob-setup.md](deploy/vercel-blob-setup.md) — Vercel Blob, no AWS.
+
+**Production uploads:** [deploy/aws-s3-setup.md](deploy/aws-s3-setup.md) — Amazon S3.
+
 ## License
 
 Private — all rights reserved.

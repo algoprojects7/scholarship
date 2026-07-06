@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchFormData } from "./api";
+import { getApiBaseUrl } from "./resolve-api-base";
 
 export interface StudentProfile {
   fullName: string;
@@ -36,11 +37,10 @@ export function uploadProfileAvatar(file: File) {
 }
 
 export async function fetchProfileAvatarBlob(): Promise<Blob> {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const { getAccessToken } = await import("./auth");
   const token = getAccessToken();
 
-  const response = await fetch(`${API_URL}/student/profile/avatar`, {
+  const response = await fetch(`${getApiBaseUrl()}/student/profile/avatar`, {
     method: "GET",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     credentials: "include",

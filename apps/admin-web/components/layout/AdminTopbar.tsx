@@ -27,7 +27,7 @@ export function AdminTopbar({
         <div className="hidden items-center gap-2 sm:flex">
           <span className="inline-flex h-2 w-2 rounded-full bg-admin-accent" />
           <span className="text-2xs font-medium uppercase tracking-wide text-admin-muted">
-            API: {process.env.NEXT_PUBLIC_API_URL ?? "not configured"}
+            API: proxied via /api
           </span>
         </div>
 

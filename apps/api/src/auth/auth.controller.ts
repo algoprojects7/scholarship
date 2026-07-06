@@ -128,9 +128,9 @@ export class AuthController {
     res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: REFRESH_TOKEN_TTL_SECONDS * 1000,
-      path: '/auth',
+      path: '/',
     });
   }
 
@@ -138,8 +138,8 @@ export class AuthController {
     res.clearCookie(REFRESH_COOKIE_NAME, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth',
+      sameSite: 'lax',
+      path: '/',
     });
   }
 

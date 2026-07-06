@@ -1,5 +1,5 @@
 import { DocumentType } from "@scholarship/shared";
-import { apiFetch, apiFetchFormData } from "./api";
+import { ApiError, apiFetch, apiFetchFormData } from "./api";
 
 export interface PersonalDetails {
   studentName: string;
@@ -127,6 +127,81 @@ export function submitApplication(id: string) {
 }
 
 export function uploadDocument(
+  applicationId: string,
+  documentType: DocumentType,
+  file: File,
+) {
+  return uploadDocumentWithPresign(applicationId, documentType, file).catch(
+    async (error) => {
+      if (
+        error instanceof ApiError &&
+        error.status === 503 &&
+        error.code === "STORAGE_LOCAL"
+      ) {
+        return uploadDocumentMultipart(applicationId, documentType, file);
+      }
+
+      throw error;
+    },
+  );
+}
+
+interface PresignUploadResponse {
+  uploadUrl: string;
+  key: string;
+}
+
+async function uploadDocumentWithPresign(
+  applicationId: string,
+  documentType: DocumentType,
+  file: File,
+) {
+  const presign = await apiFetch<PresignUploadResponse>(
+    `/applications/${applicationId}/documents/presign`,
+    {
+      method: "POST",
+      ...studentPortal,
+      body: {
+        documentType,
+        fileName: file.name,
+        contentType: file.type,
+        fileSize: file.size,
+      },
+    },
+  );
+
+  const storageResponse = await fetch(presign.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+
+  if (!storageResponse.ok) {
+    throw new ApiError(
+      "Upload to storage failed. Check object storage CORS settings.",
+      storageResponse.status,
+    );
+  }
+
+  return apiFetch<ApplicationDocument>(
+    `/applications/${applicationId}/documents/confirm`,
+    {
+      method: "POST",
+      ...studentPortal,
+      body: {
+        documentType,
+        key: presign.key,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      },
+    },
+  );
+}
+
+function uploadDocumentMultipart(
   applicationId: string,
   documentType: DocumentType,
   file: File,

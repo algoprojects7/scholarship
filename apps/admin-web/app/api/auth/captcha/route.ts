@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-function resolveApiUrl(): string {
-  const base =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:4000";
-
-  return base.replace(/\/$/, "");
-}
+import { resolveBackendApiUrl } from "@/lib/resolve-api-base";
 
 export async function GET(request: NextRequest) {
   const headers = new Headers();
@@ -17,7 +9,7 @@ export async function GET(request: NextRequest) {
     headers.set("x-forwarded-for", forwardedFor);
   }
 
-  const response = await fetch(`${resolveApiUrl()}/auth/captcha`, {
+  const response = await fetch(`${resolveBackendApiUrl()}/auth/captcha`, {
     headers,
     cache: "no-store",
   });

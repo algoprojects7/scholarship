@@ -8,6 +8,8 @@ import {
   fetchAdminDashboardStats,
   type AdminDashboardStats,
 } from "@/lib/admin";
+import { clearAccessToken } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 const STATUS_BADGE: Record<
   ApplicationStatus,
@@ -156,6 +158,7 @@ function DistrictBreakdown({
 }
 
 export function DashboardClient() {
+  const router = useRouter();
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,6 +174,11 @@ export function DashboardClient() {
       setLastUpdated(new Date());
     } catch (err) {
       if (err instanceof ApiError) {
+        if (err.status === 401) {
+          clearAccessToken();
+          router.replace("/login");
+          return;
+        }
         setError(err.message);
       } else {
         setError("Unable to load dashboard stats. Please try again.");
@@ -179,7 +187,7 @@ export function DashboardClient() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     void loadDashboard();

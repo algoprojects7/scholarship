@@ -61,6 +61,33 @@ export function getAccessToken(): string | null {
   return fromCookie;
 }
 
+export async function refreshAccessToken(
+  portal?: "student" | "admin",
+): Promise<boolean> {
+  const { getApiBaseUrl } = await import("./resolve-api-base");
+
+  const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: portal ? { "X-Portal": portal } : {},
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const data = (await response.json().catch(() => null)) as {
+    accessToken?: string;
+  } | null;
+
+  if (!data?.accessToken) {
+    return false;
+  }
+
+  setAccessToken(data.accessToken);
+  return true;
+}
+
 export function isAuthenticated(): boolean {
   return getAccessToken() !== null;
 }

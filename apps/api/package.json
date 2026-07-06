@@ -14,7 +14,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1079.0",
     "@aws-sdk/s3-request-presigner": "^3.1079.0",
-    "@vendia/serverless-express": "^4.12.6",
     "@nestjs-modules/ioredis": "^2.0.5",
     "@nestjs/common": "^10.4.15",
     "@nestjs/config": "^3.3.0",
@@ -26,6 +25,8 @@
     "@nestjs/throttler": "^6.4.0",
     "@scholarship/database": "workspace:*",
     "@scholarship/shared": "workspace:*",
+    "@vendia/serverless-express": "^4.12.6",
+    "@vercel/blob": "^0.27.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -45,7 +46,6 @@
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.2.3",
-    "@vercel/node": "^5.1.14",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
@@ -53,6 +53,7 @@
     "@types/node": "^22.10.2",
     "@types/passport-jwt": "^4.0.1",
     "@types/pdfkit": "^0.13.9",
+    "@vercel/node": "^5.1.14",
     "typescript": "^5.7.2"
   }
 }

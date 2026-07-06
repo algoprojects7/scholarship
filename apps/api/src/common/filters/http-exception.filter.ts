@@ -11,6 +11,7 @@ import type { Request, Response } from 'express';
 export interface ErrorResponseBody {
   statusCode: number;
   message: string | string[];
+  code?: string;
   timestamp: string;
   path: string;
   stack?: string;
@@ -41,7 +42,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         typeof exceptionResponse === 'object' &&
         exceptionResponse !== null
       ) {
-        const resp = exceptionResponse as { message?: string | string[] };
+        const resp = exceptionResponse as {
+          message?: string | string[];
+          code?: string;
+        };
         message = resp.message ?? exception.message;
       }
     } else if (
@@ -64,6 +68,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
     };
+
+    if (
+      exception instanceof HttpException &&
+      typeof exception.getResponse() === 'object' &&
+      exception.getResponse() !== null
+    ) {
+      const resp = exception.getResponse() as { code?: string };
+      if (resp.code) {
+        body.code = resp.code;
+      }
+    }
 
     if (
       process.env.NODE_ENV !== 'production' &&

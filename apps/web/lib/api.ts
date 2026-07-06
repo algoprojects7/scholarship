@@ -1,6 +1,5 @@
 import { getAccessToken } from "./auth";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import { getApiBaseUrl } from "./resolve-api-base";
 
 export class ApiError extends Error {
   constructor(
@@ -18,6 +17,7 @@ interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   auth?: boolean;
   portal?: "student" | "admin";
   credentials?: RequestCredentials;
+  _retry?: boolean;
 }
 
 interface ApiFetchFormDataOptions extends Omit<RequestInit, "body"> {
@@ -25,6 +25,7 @@ interface ApiFetchFormDataOptions extends Omit<RequestInit, "body"> {
   auth?: boolean;
   portal?: "student" | "admin";
   credentials?: RequestCredentials;
+  _retry?: boolean;
 }
 
 export interface MeResponse {
@@ -46,7 +47,7 @@ export async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
-  const { body, auth = false, portal, credentials, headers: initHeaders, ...rest } = options;
+  const { body, auth = false, portal, credentials, headers: initHeaders, _retry, ...rest } = options;
   const headers = new Headers(initHeaders);
 
   if (body !== undefined) {
@@ -64,12 +65,20 @@ export async function apiFetch<T>(
     }
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...rest,
     headers,
     credentials: credentials ?? (auth ? "include" : "same-origin"),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+
+  if (response.status === 401 && auth && !_retry) {
+    const { refreshAccessToken } = await import("./auth");
+    const refreshed = await refreshAccessToken(portal);
+    if (refreshed) {
+      return apiFetch<T>(path, { ...options, _retry: true });
+    }
+  }
 
   const payload = await response.json().catch(() => ({}));
 
@@ -95,7 +104,7 @@ export async function apiFetchFormData<T>(
   path: string,
   options: ApiFetchFormDataOptions,
 ): Promise<T> {
-  const { body, auth = false, portal, credentials, headers: initHeaders, ...rest } = options;
+  const { body, auth = false, portal, credentials, headers: initHeaders, _retry, ...rest } = options;
   const headers = new Headers(initHeaders);
 
   if (portal) {
@@ -109,12 +118,20 @@ export async function apiFetchFormData<T>(
     }
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...rest,
     headers,
     credentials: credentials ?? (auth ? "include" : "same-origin"),
     body,
   });
+
+  if (response.status === 401 && auth && !_retry) {
+    const { refreshAccessToken } = await import("./auth");
+    const refreshed = await refreshAccessToken(portal);
+    if (refreshed) {
+      return apiFetchFormData<T>(path, { ...options, _retry: true });
+    }
+  }
 
   const payload = await response.json().catch(() => ({}));
 
