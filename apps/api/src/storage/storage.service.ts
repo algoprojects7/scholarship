@@ -3,6 +3,7 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
+  HeadBucketCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { del, head, list, put } from '@vercel/blob';
@@ -82,11 +83,40 @@ export class StorageService implements OnModuleInit {
       }
 
       this.s3Client = new S3Client(clientConfig);
-      this.logger.log(
-        endpoint
-          ? `Using S3-compatible storage at ${endpoint}`
-          : `Using Amazon S3 in ${region} (bucket: ${this.bucket})`,
-      );
+
+      // Verify S3 connectivity
+      try {
+        await this.s3Client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+        this.logger.log(
+          endpoint
+            ? `Using S3-compatible storage at ${endpoint} (bucket: ${this.bucket})`
+            : `Using Amazon S3 in ${region} (bucket: ${this.bucket})`,
+        );
+      } catch (err: any) {
+        // Fall back to local storage if it's a network error (unreachable)
+        const isNetworkError =
+          err.code === 'ECONNREFUSED' ||
+          err.code === 'ENOTFOUND' ||
+          err.code === 'ETIMEDOUT' ||
+          err.name === 'TimeoutError' ||
+          err.$metadata?.httpStatusCode === undefined;
+
+        if (isNetworkError) {
+          this.logger.warn(
+            `S3 storage is configured but not reachable (${err.message || 'connection failed'}). Falling back to local storage.`,
+          );
+          this.backend = 'local';
+          this.s3Client = null;
+          await mkdir(this.localUploadDir, { recursive: true });
+        } else {
+          // If S3 is reachable but bucket or credentials have issues, we still log it but keep backend as s3
+          this.logger.log(
+            endpoint
+              ? `Using S3-compatible storage at ${endpoint} (bucket: ${this.bucket}, verification: ${err.message})`
+              : `Using Amazon S3 in ${region} (bucket: ${this.bucket}, verification: ${err.message})`,
+          );
+        }
+      }
       return;
     }
 
@@ -302,7 +332,17 @@ export class StorageService implements OnModuleInit {
     }
 
     if (this.backend === 'blob') {
-      await del(fileRef);
+      if (fileRef.startsWith('http')) {
+        try {
+          await del(fileRef);
+        } catch (err: any) {
+          this.logger.warn(`Failed to delete Vercel Blob file: ${err.message}`);
+        }
+      } else {
+        this.logger.warn(
+          `Skipping Vercel Blob deletion. File reference is not a URL: ${fileRef}`,
+        );
+      }
       return;
     }
 

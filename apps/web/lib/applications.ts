@@ -133,11 +133,21 @@ export function uploadDocument(
 ) {
   return uploadDocumentWithPresign(applicationId, documentType, file).catch(
     async (error) => {
-      if (
+      // Fallback to direct multipart upload if presigned upload is not supported,
+      // or if uploading directly to the presigned storage URL failed (e.g. due to connection/CORS issues)
+      const isStorageLocal =
         error instanceof ApiError &&
         error.status === 503 &&
-        error.code === "STORAGE_LOCAL"
-      ) {
+        error.code === "STORAGE_LOCAL";
+
+      // A network failure or CORS failure during upload to S3 will typically throw TypeError: Failed to fetch,
+      // or an ApiError with custom message.
+      const isUploadFailed =
+        error instanceof TypeError ||
+        (error instanceof ApiError &&
+          (error.status === 0 || error.message.includes("Upload to storage failed")));
+
+      if (isStorageLocal || isUploadFailed) {
         return uploadDocumentMultipart(applicationId, documentType, file);
       }
 

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ApplicationStatus, DocumentType } from '@scholarship/shared';
@@ -15,6 +16,8 @@ const ALLOWED_AVATAR_MIMES = ['image/jpeg', 'image/png'] as const;
 
 @Injectable()
 export class StudentsService {
+  private readonly logger = new Logger(StudentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
@@ -195,15 +198,25 @@ export class StudentsService {
     const extension = extname(file.originalname).toLowerCase() || '.jpg';
     const key = `avatars/${profile.id}/${Date.now()}${extension}`;
 
-    await this.storageService.upload(file.buffer, key, file.mimetype);
+    const fileUrl = await this.storageService.upload(
+      file.buffer,
+      key,
+      file.mimetype,
+    );
 
     if (profile.avatarUrl) {
-      await this.storageService.delete(profile.avatarUrl);
+      try {
+        await this.storageService.delete(profile.avatarUrl);
+      } catch (err: any) {
+        this.logger.warn(
+          `Failed to delete old avatar ${profile.avatarUrl}: ${err.message}`,
+        );
+      }
     }
 
     await this.prisma.studentProfile.update({
       where: { id: profile.id },
-      data: { avatarUrl: key },
+      data: { avatarUrl: fileUrl },
     });
 
     return {
