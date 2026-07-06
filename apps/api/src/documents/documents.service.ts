@@ -122,13 +122,17 @@ export class DocumentsService {
       documentType,
       file.originalname,
     );
-    await this.storageService.upload(file.buffer, key, file.mimetype);
+    const fileUrl = await this.storageService.upload(
+      file.buffer,
+      key,
+      file.mimetype,
+    );
 
     return this.saveDocumentRecord(
       applicationId,
       documentType,
       file.originalname,
-      key,
+      fileUrl,
       file.size,
       file.mimetype,
     );
@@ -185,6 +189,41 @@ export class DocumentsService {
     return this.buildAdminPreviewResult(document);
   }
 
+  async getAdminDocumentPreviewAccess(documentId: string) {
+    const document = await this.prisma.applicationDocument.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    const mimeType = document.mimeType ?? 'application/octet-stream';
+
+    if (this.storageService.isLocalStorage()) {
+      return {
+        mode: 'proxy' as const,
+        mimeType,
+        fileName: document.fileName,
+      };
+    }
+
+    const url = await this.storageService
+      .getSignedUrl(document.fileUrl)
+      .catch(() => {
+        throw new NotFoundException(
+          'Document file is missing from storage. Ask the student to re-upload it.',
+        );
+      });
+
+    return {
+      mode: 'url' as const,
+      url,
+      mimeType,
+      fileName: document.fileName,
+    };
+  }
+
   private async buildPreviewResult(document: {
     fileUrl: string;
     mimeType: string | null;
@@ -214,6 +253,29 @@ export class DocumentsService {
       return {
         mode: 'local' as const,
         filePath: this.storageService.getLocalFilePath(document.fileUrl),
+        mimeType,
+        fileName: document.fileName,
+      };
+    }
+
+    if (
+      this.storageService.isBlobStorage() &&
+      document.fileUrl.startsWith('http')
+    ) {
+      return {
+        mode: 'redirect' as const,
+        url: document.fileUrl,
+        mimeType,
+        fileName: document.fileName,
+      };
+    }
+
+    if (this.storageService.isBlobStorage()) {
+      const url = await this.storageService.getSignedUrl(document.fileUrl);
+
+      return {
+        mode: 'redirect' as const,
+        url,
         mimeType,
         fileName: document.fileName,
       };

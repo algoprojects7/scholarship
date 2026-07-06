@@ -34,6 +34,12 @@ export class AdminDocumentsController {
     private readonly prisma: PrismaService,
   ) {}
 
+  @Get(':id/preview-url')
+  @Permissions(Permission.VIEW_APPLICATION_QUEUE)
+  previewUrl(@Param('id', ParseUUIDPipe) id: string) {
+    return this.documentsService.getAdminDocumentPreviewAccess(id);
+  }
+
   @Get(':id/preview')
   @Permissions(Permission.VIEW_APPLICATION_QUEUE)
   async preview(
@@ -41,6 +47,10 @@ export class AdminDocumentsController {
     @Res() res: Response,
   ) {
     const result = await this.documentsService.getAdminPreviewUrl(id);
+
+    if (result.mode === 'redirect') {
+      return res.redirect(result.url);
+    }
 
     res.setHeader('Content-Type', result.mimeType);
     res.setHeader(

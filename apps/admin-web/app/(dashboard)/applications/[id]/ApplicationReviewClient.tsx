@@ -17,7 +17,7 @@ import { ApiError } from "@/lib/api";
 import type { AdminApplication, AdminApplicationDocument } from "@/lib/applications";
 import {
   getAdminApplication,
-  openDocumentPreview,
+  getDocumentPreviewHref,
   startReview,
   submitDecision,
   verifyDocument,
@@ -207,7 +207,6 @@ function DocumentsTab({
   documents,
   canVerify,
   onVerify,
-  onPreview,
   busyDocumentId,
 }: {
   documents: AdminApplicationDocument[];
@@ -217,7 +216,6 @@ function DocumentsTab({
     status: DocumentVerificationStatus.VERIFIED | DocumentVerificationStatus.REJECTED,
     rejectionReason?: string,
   ) => Promise<void>;
-  onPreview: (documentId: string) => Promise<void>;
   busyDocumentId: string | null;
 }) {
   const documentsByType = useMemo(
@@ -267,14 +265,14 @@ function DocumentsTab({
             <div className="flex items-center justify-end gap-1.5">
               {document ? (
                 <>
-                  <button
-                    type="button"
-                    disabled={isBusy}
-                    onClick={() => void onPreview(document.id)}
-                    className="rounded border border-admin-border bg-admin-surface px-2 py-1 text-2xs font-medium text-admin-primary hover:bg-admin-bg disabled:opacity-60"
+                  <a
+                    href={getDocumentPreviewHref(document)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded border border-admin-border bg-admin-surface px-2 py-1 text-2xs font-medium text-admin-primary hover:bg-admin-bg"
                   >
                     Preview
-                  </button>
+                  </a>
                   {canVerify &&
                   document.verificationStatus !==
                     DocumentVerificationStatus.VERIFIED ? (
@@ -865,19 +863,6 @@ export function ApplicationReviewClient({
     }
   };
 
-  const handlePreviewDocument = async (documentId: string) => {
-    try {
-      await openDocumentPreview(documentId);
-    } catch (previewError) {
-      showToast(
-        previewError instanceof ApiError
-          ? previewError.message
-          : "Unable to preview document.",
-        "error",
-      );
-    }
-  };
-
   const handleAllocated = async () => {
     showToast("Scholarship allocated successfully.", "success");
     await loadApplication();
@@ -1129,7 +1114,6 @@ export function ApplicationReviewClient({
               documents={application.documents ?? []}
               canVerify={canVerifyDocuments}
               onVerify={handleVerifyDocument}
-              onPreview={handlePreviewDocument}
               busyDocumentId={busyDocumentId}
             />
           ) : null}

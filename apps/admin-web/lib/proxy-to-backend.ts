@@ -56,7 +56,6 @@ export async function proxyToBackend(
   }
 
   const response = await fetch(targetUrl, init);
-  const body = await response.arrayBuffer();
 
   const responseHeaders = new Headers();
   const contentType = response.headers.get("content-type");
@@ -79,7 +78,7 @@ export async function proxyToBackend(
     responseHeaders.set("set-cookie", rewriteSetCookieForFrontend(setCookie));
   }
 
-  return new NextResponse(body, {
+  return new NextResponse(response.body, {
     status: response.status,
     headers: responseHeaders,
   });

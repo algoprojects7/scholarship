@@ -4,9 +4,7 @@ import {
   type DocumentType,
   type RemarkAction,
 } from "@scholarship/shared";
-import { ApiError, apiFetch } from "./api";
-import { getAccessToken } from "./auth";
-import { getApiBaseUrl } from "./resolve-api-base";
+import { apiFetch } from "./api";
 const adminPortal = { auth: true, portal: "admin" as const };
 
 export interface PersonalDetails {
@@ -198,69 +196,10 @@ export function verifyDocument(id: string, payload: VerifyDocumentPayload) {
   });
 }
 
-export async function openDocumentPreview(documentId: string): Promise<void> {
-  await openDocumentPreviewRequest(documentId, false);
-}
-
-async function openDocumentPreviewRequest(
-  documentId: string,
-  retried: boolean,
-): Promise<void> {
-  const token = getAccessToken();
-  const response = await fetch(
-    `${getApiBaseUrl()}/admin/documents/${documentId}/preview`,
-    {
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        "X-Portal": "admin",
-      },
-      credentials: "include",
-    },
-  );
-
-  if (response.status === 401 && !retried) {
-    const { refreshAccessToken } = await import("./auth");
-    const refreshed = await refreshAccessToken("admin");
-    if (refreshed) {
-      return openDocumentPreviewRequest(documentId, true);
-    }
+export function getDocumentPreviewHref(document: AdminApplicationDocument): string {
+  if (document.fileUrl.startsWith("http")) {
+    return document.fileUrl;
   }
 
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    const message =
-      typeof payload.message === "string"
-        ? payload.message
-        : Array.isArray(payload.message)
-          ? payload.message.join(", ")
-          : "Unable to preview document";
-
-    throw new ApiError(message, response.status);
-  }
-
-  const contentType =
-    response.headers.get("content-type") ?? "application/octet-stream";
-  const blob = await response.blob();
-
-  if (blob.size === 0) {
-    throw new ApiError("Document file is empty or unavailable", 404);
-  }
-
-  const typedBlob =
-    blob.type && blob.type !== "application/octet-stream"
-      ? blob
-      : new Blob([blob], { type: contentType });
-
-  const objectUrl = URL.createObjectURL(typedBlob);
-  const previewWindow = window.open(objectUrl, "_blank");
-
-  if (!previewWindow) {
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    anchor.click();
-  }
-
-  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 120_000);
+  return `/api/admin/documents/${document.id}/preview`;
 }

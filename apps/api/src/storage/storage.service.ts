@@ -5,7 +5,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { del, getDownloadUrl, head, put } from '@vercel/blob';
+import { del, head, put } from '@vercel/blob';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { mkdir, unlink, writeFile } from 'fs/promises';
@@ -144,7 +144,7 @@ export class StorageService implements OnModuleInit {
 
   async getSignedUrl(key: string): Promise<string> {
     if (this.backend === 'blob') {
-      return this.getBlobDownloadUrl(key);
+      return this.resolveBlobPublicUrl(key);
     }
 
     if (this.backend === 'local') {
@@ -185,12 +185,21 @@ export class StorageService implements OnModuleInit {
       throw new Error('Blob download URLs are only available in blob mode');
     }
 
-    try {
-      const metadata = await head(blobUrl);
-      return metadata.downloadUrl;
-    } catch {
-      return getDownloadUrl(blobUrl);
+    const metadata = await head(blobUrl);
+    return metadata.downloadUrl;
+  }
+
+  async resolveBlobPublicUrl(fileRef: string): Promise<string> {
+    if (this.backend !== 'blob') {
+      throw new Error('Blob public URLs are only available in blob mode');
     }
+
+    if (fileRef.startsWith('http')) {
+      return fileRef;
+    }
+
+    const metadata = await head(fileRef);
+    return metadata.url;
   }
 
   async fetchFileContent(
@@ -259,4 +268,4 @@ export class StorageService implements OnModuleInit {
     );
   }
 }
-
+
