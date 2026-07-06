@@ -32,9 +32,6 @@ export class StorageService implements OnModuleInit {
     const blobToken =
       this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
       process.env.BLOB_READ_WRITE_TOKEN;
-    const blobStoreId =
-      this.configService.get<string>('BLOB_STORE_ID') ??
-      process.env.BLOB_STORE_ID;
     const accessKey =
       this.configService.get<string>('S3_ACCESS_KEY') ??
       process.env.S3_ACCESS_KEY;
@@ -177,9 +174,6 @@ export class StorageService implements OnModuleInit {
       const token =
         this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
         process.env.BLOB_READ_WRITE_TOKEN;
-      const storeId =
-        this.configService.get<string>('BLOB_STORE_ID') ??
-        process.env.BLOB_STORE_ID;
       const accessInput =
         this.configService.get<string>('BLOB_ACCESS') ??
         process.env.BLOB_ACCESS ??
@@ -187,7 +181,7 @@ export class StorageService implements OnModuleInit {
       const access = accessInput === 'private' ? 'private' : 'public';
 
       this.logger.log(
-        `Uploading blob. Key: ${key}. Access: ${access}. Has token: ${!!token}. Has storeId: ${!!storeId}`,
+        `Uploading blob. Key: ${key}. Access: ${access}. Has token: ${!!token}`,
       );
 
       try {
