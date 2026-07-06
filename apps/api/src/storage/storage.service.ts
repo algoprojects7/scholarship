@@ -27,7 +27,7 @@ export class StorageService implements OnModuleInit {
     const secretKey = this.configService.get<string>('S3_SECRET_KEY');
     this.bucket =
       this.configService.get<string>('S3_BUCKET') ?? 'scholarship-docs';
-    this.localUploadDir = join(process.cwd(), 'uploads');
+    this.localUploadDir = this.resolveLocalUploadDir();
 
     if (endpoint && accessKey && secretKey) {
       this.useLocalStorage = false;
@@ -44,8 +44,27 @@ export class StorageService implements OnModuleInit {
     } else {
       this.useLocalStorage = true;
       await mkdir(this.localUploadDir, { recursive: true });
-      this.logger.log('Using local uploads/ storage (S3 not configured)');
+      this.logger.log(`Using local storage at ${this.localUploadDir}`);
+      if (process.env.NODE_ENV === 'production') {
+        this.logger.warn(
+          'S3 is not configured — uploads are stored locally and may be ephemeral on serverless hosts. Set S3_* env vars for production.',
+        );
+      }
     }
+  }
+
+  private resolveLocalUploadDir(): string {
+    const configured = this.configService.get<string>('UPLOAD_DIR');
+    if (configured) {
+      return configured;
+    }
+
+    // Vercel/Lambda only allow writes under /tmp
+    if (process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      return join('/tmp', 'uploads');
+    }
+
+    return join(process.cwd(), 'uploads');
   }
 
   isLocalStorage(): boolean {
