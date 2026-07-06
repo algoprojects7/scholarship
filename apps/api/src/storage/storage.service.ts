@@ -31,6 +31,9 @@ export class StorageService implements OnModuleInit {
     const blobToken =
       this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
       process.env.BLOB_READ_WRITE_TOKEN;
+    const blobStoreId =
+      this.configService.get<string>('BLOB_STORE_ID') ??
+      process.env.BLOB_STORE_ID;
     const accessKey =
       this.configService.get<string>('S3_ACCESS_KEY') ??
       process.env.S3_ACCESS_KEY;
@@ -50,9 +53,13 @@ export class StorageService implements OnModuleInit {
       'scholarship-docs';
     this.localUploadDir = this.resolveLocalUploadDir();
 
-    if (blobToken) {
+    if (blobToken || blobStoreId) {
       this.backend = 'blob';
-      this.logger.log('Using Vercel Blob storage');
+      this.logger.log(
+        blobToken
+          ? 'Using Vercel Blob storage (token auth)'
+          : 'Using Vercel Blob storage (OIDC zero-config auth)',
+      );
       return;
     }
 
