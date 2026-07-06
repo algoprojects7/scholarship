@@ -196,6 +196,45 @@ export function verifyDocument(id: string, payload: VerifyDocumentPayload) {
   });
 }
 
+export interface DocumentPreviewContent {
+  previewUrl: string;
+  mimeType: string;
+  fileName: string;
+}
+
+interface AdminDocumentPreviewAccessResponse {
+  mode: "url" | "proxy";
+  url?: string;
+  mimeType: string;
+  fileName: string;
+}
+
+export async function fetchDocumentPreview(
+  documentId: string,
+): Promise<DocumentPreviewContent> {
+  const access = await apiFetch<AdminDocumentPreviewAccessResponse>(
+    `/admin/documents/${documentId}/preview-url`,
+    {
+      auth: true,
+      portal: "admin",
+    },
+  );
+
+  if (access.mode === "url" && access.url) {
+    return {
+      previewUrl: access.url,
+      mimeType: access.mimeType,
+      fileName: access.fileName,
+    };
+  }
+
+  return {
+    previewUrl: `/api/admin/documents/${documentId}/preview`,
+    mimeType: access.mimeType,
+    fileName: access.fileName,
+  };
+}
+
 export function getDocumentPreviewHref(document: AdminApplicationDocument): string {
   if (document.fileUrl.startsWith("http")) {
     return document.fileUrl;

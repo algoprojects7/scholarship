@@ -17,12 +17,14 @@ import { ApiError } from "@/lib/api";
 import type { AdminApplication, AdminApplicationDocument } from "@/lib/applications";
 import {
   getAdminApplication,
-  getDocumentPreviewHref,
+  fetchDocumentPreview,
   startReview,
   submitDecision,
   verifyDocument,
+  type DocumentPreviewContent,
 } from "@/lib/applications";
 import { createAllocation } from "@/lib/allocations";
+import { DocumentPreviewModal } from "@/components/DocumentPreviewModal";
 
 type TabId =
   | "personal"
@@ -207,7 +209,9 @@ function DocumentsTab({
   documents,
   canVerify,
   onVerify,
+  onPreview,
   busyDocumentId,
+  previewingDocumentId,
 }: {
   documents: AdminApplicationDocument[];
   canVerify: boolean;
@@ -216,7 +220,9 @@ function DocumentsTab({
     status: DocumentVerificationStatus.VERIFIED | DocumentVerificationStatus.REJECTED,
     rejectionReason?: string,
   ) => Promise<void>;
+  onPreview: (document: AdminApplicationDocument) => void;
   busyDocumentId: string | null;
+  previewingDocumentId: string | null;
 }) {
   const documentsByType = useMemo(
     () => new Map(documents.map((document) => [document.documentType, document])),
@@ -235,6 +241,7 @@ function DocumentsTab({
       {DOCUMENT_TYPES.map(({ type, label }) => {
         const document = documentsByType.get(type);
         const isBusy = document ? busyDocumentId === document.id : false;
+        const isPreviewing = document ? previewingDocumentId === document.id : false;
 
         return (
           <div
@@ -265,14 +272,14 @@ function DocumentsTab({
             <div className="flex items-center justify-end gap-1.5">
               {document ? (
                 <>
-                  <a
-                    href={getDocumentPreviewHref(document)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded border border-admin-border bg-admin-surface px-2 py-1 text-2xs font-medium text-admin-primary hover:bg-admin-bg"
+                  <button
+                    type="button"
+                    disabled={isBusy || isPreviewing}
+                    onClick={() => onPreview(document)}
+                    className="rounded border border-admin-border bg-admin-surface px-2 py-1 text-2xs font-medium text-admin-primary hover:bg-admin-bg disabled:opacity-60 transition-colors"
                   >
-                    Preview
-                  </a>
+                    {isPreviewing ? "Loading..." : "Preview"}
+                  </button>
                   {canVerify &&
                   document.verificationStatus !==
                     DocumentVerificationStatus.VERIFIED ? (
@@ -726,6 +733,8 @@ export function ApplicationReviewClient({
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [isSubmittingAllocation, setIsSubmittingAllocation] = useState(false);
   const [busyDocumentId, setBusyDocumentId] = useState<string | null>(null);
+  const [previewingDocumentId, setPreviewingDocumentId] = useState<string | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<DocumentPreviewContent | null>(null);
 
   const showToast = useCallback((message: string, tone: "success" | "error") => {
     setToast({ message, tone });
@@ -860,6 +869,32 @@ export function ApplicationReviewClient({
       );
     } finally {
       setBusyDocumentId(null);
+    }
+  };
+
+  const handlePreviewDocument = async (doc: AdminApplicationDocument) => {
+    if (doc.fileUrl.startsWith("http")) {
+      setPreviewDocument({
+        previewUrl: doc.fileUrl,
+        mimeType: doc.mimeType ?? "application/pdf",
+        fileName: doc.fileName,
+      });
+      return;
+    }
+
+    setPreviewingDocumentId(doc.id);
+    try {
+      const preview = await fetchDocumentPreview(doc.id);
+      setPreviewDocument(preview);
+    } catch (err) {
+      showToast(
+        err instanceof ApiError
+          ? err.message
+          : "Unable to load document preview URL.",
+        "error",
+      );
+    } finally {
+      setPreviewingDocumentId(null);
     }
   };
 
@@ -1114,7 +1149,9 @@ export function ApplicationReviewClient({
               documents={application.documents ?? []}
               canVerify={canVerifyDocuments}
               onVerify={handleVerifyDocument}
+              onPreview={handlePreviewDocument}
               busyDocumentId={busyDocumentId}
+              previewingDocumentId={previewingDocumentId}
             />
           ) : null}
 
@@ -1144,6 +1181,15 @@ export function ApplicationReviewClient({
       </div>
 
       <Toast toast={toast} onDismiss={() => setToast(null)} />
+
+      {previewDocument && (
+        <DocumentPreviewModal
+          fileName={previewDocument.fileName}
+          mimeType={previewDocument.mimeType}
+          previewUrl={previewDocument.previewUrl}
+          onClose={() => setPreviewDocument(null)}
+        />
+      )}
     </div>
   );
 }
