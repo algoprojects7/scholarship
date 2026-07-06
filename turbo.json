@@ -1,6 +1,32 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "PRISMA_DATABASE_URL",
+    "POSTGRES_URL",
+    "REDIS_URL",
+    "KV_URL",
+    "KV_REST_API_URL",
+    "KV_REST_API_TOKEN",
+    "KV_REST_API_READ_ONLY_TOKEN",
+    "JWT_ACCESS_SECRET",
+    "JWT_REFRESH_SECRET",
+    "JWT_ACCESS_EXPIRY",
+    "JWT_REFRESH_EXPIRY",
+    "PORT",
+    "NODE_ENV",
+    "CAPTCHA_TTL_SECONDS",
+    "SITE_URL",
+    "ADMIN_URL",
+    "API_URL",
+    "CORS_ORIGINS",
+    "S3_ENDPOINT",
+    "S3_BUCKET",
+    "S3_ACCESS_KEY",
+    "S3_SECRET_KEY",
+    "S3_REGION"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
