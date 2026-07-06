@@ -148,19 +148,21 @@ export class StorageService implements OnModuleInit {
       const storeId =
         this.configService.get<string>('BLOB_STORE_ID') ??
         process.env.BLOB_STORE_ID;
-      const oidcToken =
-        this.configService.get<string>('VERCEL_OIDC_TOKEN') ??
-        process.env.VERCEL_OIDC_TOKEN;
 
-      const blob = await put(key, file, {
-        access: 'public',
-        addRandomSuffix: false,
-        contentType,
-        ...(token ? { token } : {}),
-        ...(storeId ? { storeId } : {}),
-        ...(oidcToken ? { oidcToken } : {}),
-      });
-      return blob.url;
+      this.logger.log(`Uploading blob. Key: ${key}. Has token: ${!!token}. Has storeId: ${!!storeId}`);
+
+      try {
+        const blob = await put(key, file, {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType,
+          ...(token ? { token } : {}),
+        });
+        return blob.url;
+      } catch (err: any) {
+        this.logger.error(`Vercel Blob upload failed: ${err.message}`, err.stack);
+        throw err;
+      }
     }
 
     await this.s3Client!.send(
@@ -251,18 +253,10 @@ export class StorageService implements OnModuleInit {
       const token =
         this.configService.get<string>('BLOB_READ_WRITE_TOKEN') ??
         process.env.BLOB_READ_WRITE_TOKEN;
-      const storeId =
-        this.configService.get<string>('BLOB_STORE_ID') ??
-        process.env.BLOB_STORE_ID;
-      const oidcToken =
-        this.configService.get<string>('VERCEL_OIDC_TOKEN') ??
-        process.env.VERCEL_OIDC_TOKEN;
 
       const headers = new Headers();
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
-      } else if (oidcToken) {
-        headers.set('Authorization', `Bearer ${oidcToken}`);
       }
 
       const response = await fetch(downloadUrl, { headers });
