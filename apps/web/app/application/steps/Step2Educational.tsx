@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import type { ApplicationFormValues } from "../schemas";
-import { READING_YEAR_OPTIONS } from "../schemas";
+import { READING_YEAR_OPTIONS, COURSE_OPTIONS } from "../schemas";
 import { FieldError, StepHeading } from "../components/FormHelpers";
 
 export function Step2Educational() {
@@ -89,13 +89,21 @@ export function Step2Educational() {
           >
             Course Name <span className="text-red-500">*</span>
           </label>
-          <input
+          <select
             id="educationalDetails.courseName"
-            type="text"
             className="input-field"
             aria-invalid={errors.educationalDetails?.courseName ? true : undefined}
             {...register("educationalDetails.courseName")}
-          />
+          >
+            <option value="" disabled>
+              Select course
+            </option>
+            {COURSE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
           <FieldError message={errors.educationalDetails?.courseName?.message} />
         </div>
       </div>

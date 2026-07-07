@@ -1,4 +1,4 @@
-import { INDIAN_STATE_NAMES, PaymentType } from "@scholarship/shared";
+import { INDIAN_STATE_NAMES, PaymentType, COURSE_OPTIONS } from "@scholarship/shared";
 import { mobileSchema, phoneSchema } from "@scholarship/shared";
 import { z } from "zod";
 
@@ -21,7 +21,9 @@ export const personalDetailsSchema = z.object({
 export const educationalDetailsSchema = z.object({
   readingYear: z.string().min(1, "Select reading year"),
   institutionName: z.string().trim().min(2, "Required").max(200, "Too long"),
-  courseName: z.string().trim().min(2, "Required").max(100, "Too long"),
+  courseName: z.enum(COURSE_OPTIONS, {
+    errorMap: () => ({ message: "Select a course" }),
+  }),
   batch: z
     .string()
     .trim()
@@ -106,4 +108,4 @@ export const PAYMENT_TYPE_OPTIONS = [
   { value: PaymentType.ONE_TIME, label: "One Time" },
 ] as const;
 
-export { mobileSchema };
+export { mobileSchema, COURSE_OPTIONS };

@@ -52,7 +52,8 @@ export function buildDefaultFormValues(
     educationalDetails: {
       readingYear: application.educationalDetails?.readingYear ?? "",
       institutionName: application.educationalDetails?.institutionName ?? "",
-      courseName: application.educationalDetails?.courseName ?? "",
+      courseName: (application.educationalDetails?.courseName ??
+        "") as ApplicationFormValues["educationalDetails"]["courseName"],
       batch: application.educationalDetails?.batch ?? "",
     },
     contactAddress: {

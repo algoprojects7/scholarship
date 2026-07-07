@@ -26,6 +26,12 @@ export const personalDetailsSchema = z.object({
     .max(50, 'Religion must be at most 50 characters'),
 });
 
+export const COURSE_OPTIONS = [
+  'HS (Arts)',
+  'HS (Sc)',
+  'HS (Comm)',
+] as const;
+
 export const educationalDetailsSchema = z.object({
   readingYear: z
     .string()
@@ -35,15 +41,15 @@ export const educationalDetailsSchema = z.object({
     .string()
     .min(2, 'Institution name must be at least 2 characters')
     .max(200, 'Institution name must be at most 200 characters'),
-  courseName: z
-    .string()
-    .min(2, 'Course name must be at least 2 characters')
-    .max(200, 'Course name must be at most 200 characters'),
+  courseName: z.enum(COURSE_OPTIONS, {
+    errorMap: () => ({ message: 'Please select a valid course option' }),
+  }),
   batch: z
     .string()
     .min(1, 'Batch is required')
     .max(50, 'Batch must be at most 50 characters'),
 });
+
 
 export const contactAddressSchema = z.object({
   countryCode: countryCodeSchema,
