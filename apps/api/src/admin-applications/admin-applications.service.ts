@@ -74,6 +74,7 @@ export class AdminApplicationsService {
     return {
       items: items.map((application) => ({
         ...application,
+        studentName: application.student?.fullName ?? '—',
         district: extractDistrict(application.contactAddress),
       })),
       meta: {
