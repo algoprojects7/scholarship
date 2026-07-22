@@ -8,29 +8,60 @@ import { apiFetch } from "./api";
 const adminPortal = { auth: true, portal: "admin" as const };
 
 export interface PersonalDetails {
-  studentName: string;
-  fatherName: string;
-  fatherProfession: string;
-  motherName: string;
-  motherProfession: string;
-  religion: string;
+  studentName?: string;
+  gender?: string;
+  fatherName?: string;
+  fatherProfession?: string;
+  motherName?: string;
+  motherProfession?: string;
+  religion?: string;
+  caste?: string;
 }
 
 export interface EducationalDetails {
-  readingYear: string;
-  institutionName: string;
-  courseName: string;
-  batch: string;
+  readingYear?: string;
+  institutionName?: string;
+  courseName?: string;
+  duration?: string;
+  batch?: string;
+  rollNumber?: string;
+  currentSemester?: string;
+  instituteNameWithAddress?: string;
+  dateOfCourseCompletion?: string;
+  residenceType?: string;
+}
+
+export interface StudentContactInfo {
+  countryCode?: string;
+  mobile?: string;
+  email?: string;
+  whatsapp?: string;
+}
+
+export interface GuardianContactInfo {
+  countryCode?: string;
+  mobile?: string;
+}
+
+export interface AddressInfo {
+  villageTown?: string;
+  po?: string;
+  district?: string;
+  pin?: string;
+  state?: string;
 }
 
 export interface ContactAddress {
   countryCode?: string;
-  mobile: string;
-  village: string;
-  po: string;
-  district: string;
-  pin: string;
-  state: string;
+  mobile?: string;
+  village?: string;
+  po?: string;
+  district?: string;
+  pin?: string;
+  state?: string;
+  student?: StudentContactInfo;
+  guardian?: GuardianContactInfo;
+  address?: AddressInfo;
 }
 
 export interface BankDetails {
@@ -126,9 +157,9 @@ export interface AdminApplication {
   status: ApplicationStatus;
   academicYear: string;
   applicationNumber?: string | null;
-  personalDetails?: any | null;
-  educationalDetails?: any | null;
-  contactAddress?: any | null;
+  personalDetails?: PersonalDetails | null;
+  educationalDetails?: EducationalDetails | null;
+  contactAddress?: ContactAddress | null;
   bankDetails?: BankDetails | null;
   feeDetails?: FeeDetails | null;
   feePayments?: FeePayment[];
