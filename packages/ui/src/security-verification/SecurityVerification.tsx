@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import type { SecurityVerificationProps } from "./types";
 import { useCaptcha } from "./useCaptcha";
 import { SecurityPuzzle } from "./SecurityPuzzle";
@@ -14,28 +14,40 @@ export function SecurityVerification({
 }: SecurityVerificationProps) {
   const { captchaId, refresh } = useCaptcha(apiBaseUrl);
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   useEffect(() => {
     if (captchaId && captchaId !== value.captchaId) {
-      onChange({ captchaId, captchaCode: value.captchaCode });
+      onChangeRef.current({ captchaId, captchaCode: value.captchaCode });
     }
-  }, [captchaId, onChange, value.captchaCode, value.captchaId]);
+  }, [captchaId, value.captchaId, value.captchaCode]);
+
+  const handleSolve = useCallback(
+    (token: string) => {
+      onChangeRef.current({
+        captchaId: value.captchaId || captchaId,
+        captchaCode: token,
+      });
+    },
+    [captchaId, value.captchaId],
+  );
+
+  const handleReset = useCallback(() => {
+    void refresh();
+    onChangeRef.current({
+      captchaId: captchaId,
+      captchaCode: "",
+    });
+  }, [captchaId, refresh]);
 
   return (
     <SecurityPuzzle
       captchaId={value.captchaId || captchaId}
-      onSolve={(token) => {
-        onChange({
-          captchaId: value.captchaId || captchaId,
-          captchaCode: token,
-        });
-      }}
-      onReset={() => {
-        void refresh();
-        onChange({
-          captchaId: captchaId,
-          captchaCode: "",
-        });
-      }}
+      onSolve={handleSolve}
+      onReset={handleReset}
       disabled={disabled}
       error={error}
     />

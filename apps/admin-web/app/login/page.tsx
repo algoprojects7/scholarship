@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0F172A] px-4 py-10">
-      <div className="w-full max-w-md overflow-hidden rounded-lg border border-slate-700/60 bg-admin-surface shadow-2xl shadow-black/30">
+      <div className="w-full max-w-xl sm:max-w-2xl overflow-hidden rounded-lg border border-slate-700/60 bg-admin-surface shadow-2xl shadow-black/30">
         <div className="border-b border-admin-border bg-[#0F172A] px-8 py-6">
           <p className="admin-kpi-label mb-2 text-slate-400">
             Scholarship Management
