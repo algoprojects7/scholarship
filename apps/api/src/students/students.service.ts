@@ -104,9 +104,9 @@ export class StudentsService {
         : null,
       scholarship,
       remarks,
-      documentsStatus: REQUIRED_DOCUMENT_TYPES.map((type) => ({
+      documentsStatus: Object.values(DocumentType).map((type) => ({
         documentType: type,
-        uploaded: uploadedTypes.has(type as DocumentType),
+        uploaded: uploadedTypes.has(type as any),
       })),
     };
   }

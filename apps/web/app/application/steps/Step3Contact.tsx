@@ -3,8 +3,8 @@
 import { INDIAN_STATES } from "@scholarship/shared";
 import { PhoneInput } from "@scholarship/ui";
 import { Controller, useFormContext } from "react-hook-form";
-import type { ApplicationFormValues } from "../schemas";
 import { FieldError, StepHeading } from "../components/FormHelpers";
+import type { ApplicationFormValues } from "../schemas";
 
 export function Step3Contact() {
   const {
@@ -14,128 +14,206 @@ export function Step3Contact() {
   } = useFormContext<ApplicationFormValues>();
 
   return (
-    <div>
-      <StepHeading
-        title="Contact & Address"
-        description="Your mobile number and permanent address details."
-      />
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="sm:col-span-2">
+    <div className="space-y-8">
+      {/* Student Section */}
+      <div>
+        <StepHeading
+          title="Student Contact"
+          description="Direct contact details for the student."
+        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="contactAddress.student.mobile"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              Student Mobile Number <span className="text-red-500">*</span>
+            </label>
+            <Controller
+              name="contactAddress.student.mobile"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  id="contactAddress.student.mobile"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.contactAddress?.student?.mobile?.message}
+                />
+              )}
+            />
+            <input type="hidden" {...register("contactAddress.student.countryCode")} />
+          </div>
+
+          <div>
+            <label
+              htmlFor="contactAddress.student.email"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              Student Email Id <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contactAddress.student.email"
+              type="email"
+              className="input-field"
+              aria-invalid={errors.contactAddress?.student?.email ? true : undefined}
+              {...register("contactAddress.student.email")}
+            />
+            <FieldError message={errors.contactAddress?.student?.email?.message} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="contactAddress.student.whatsapp"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              WhatsApp Number <span className="text-xs text-[var(--color-muted-foreground)]">(Optional)</span>
+            </label>
+            <Controller
+              name="contactAddress.student.whatsapp"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  id="contactAddress.student.whatsapp"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.contactAddress?.student?.whatsapp?.message}
+                />
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Guardian Section */}
+      <div className="border-t border-[var(--color-border)] pt-6">
+        <StepHeading
+          title="Guardian Contact"
+          description="Contact information for parent or legal guardian."
+        />
+        <div className="max-w-md">
           <label
-            htmlFor="contactAddress.mobile"
+            htmlFor="contactAddress.guardian.mobile"
             className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
           >
-            Mobile Number <span className="text-red-500">*</span>
+            Guardian Mobile Number <span className="text-red-500">*</span>
           </label>
           <Controller
-            name="contactAddress.mobile"
+            name="contactAddress.guardian.mobile"
             control={control}
             render={({ field }) => (
               <PhoneInput
-                id="contactAddress.mobile"
+                id="contactAddress.guardian.mobile"
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
-                error={errors.contactAddress?.mobile?.message}
+                error={errors.contactAddress?.guardian?.mobile?.message}
               />
             )}
           />
-          <input type="hidden" {...register("contactAddress.countryCode")} />
+          <input type="hidden" {...register("contactAddress.guardian.countryCode")} />
         </div>
+      </div>
 
-        <div>
-          <label
-            htmlFor="contactAddress.village"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
-          >
-            Village <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="contactAddress.village"
-            type="text"
-            className="input-field"
-            aria-invalid={errors.contactAddress?.village ? true : undefined}
-            {...register("contactAddress.village")}
-          />
-          <FieldError message={errors.contactAddress?.village?.message} />
-        </div>
+      {/* Address Section */}
+      <div className="border-t border-[var(--color-border)] pt-6">
+        <StepHeading
+          title="Permanent Address"
+          description="Residential address details."
+        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="contactAddress.address.villageTown"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              Village / Town <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contactAddress.address.villageTown"
+              type="text"
+              className="input-field"
+              aria-invalid={errors.contactAddress?.address?.villageTown ? true : undefined}
+              {...register("contactAddress.address.villageTown")}
+            />
+            <FieldError message={errors.contactAddress?.address?.villageTown?.message} />
+          </div>
 
-        <div>
-          <label
-            htmlFor="contactAddress.po"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
-          >
-            P.O. <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="contactAddress.po"
-            type="text"
-            className="input-field"
-            aria-invalid={errors.contactAddress?.po ? true : undefined}
-            {...register("contactAddress.po")}
-          />
-          <FieldError message={errors.contactAddress?.po?.message} />
-        </div>
+          <div>
+            <label
+              htmlFor="contactAddress.address.po"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              P.O. <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contactAddress.address.po"
+              type="text"
+              className="input-field"
+              aria-invalid={errors.contactAddress?.address?.po ? true : undefined}
+              {...register("contactAddress.address.po")}
+            />
+            <FieldError message={errors.contactAddress?.address?.po?.message} />
+          </div>
 
-        <div>
-          <label
-            htmlFor="contactAddress.district"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
-          >
-            District <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="contactAddress.district"
-            type="text"
-            className="input-field"
-            aria-invalid={errors.contactAddress?.district ? true : undefined}
-            {...register("contactAddress.district")}
-          />
-          <FieldError message={errors.contactAddress?.district?.message} />
-        </div>
+          <div>
+            <label
+              htmlFor="contactAddress.address.district"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              District <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contactAddress.address.district"
+              type="text"
+              className="input-field"
+              aria-invalid={errors.contactAddress?.address?.district ? true : undefined}
+              {...register("contactAddress.address.district")}
+            />
+            <FieldError message={errors.contactAddress?.address?.district?.message} />
+          </div>
 
-        <div>
-          <label
-            htmlFor="contactAddress.pin"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
-          >
-            PIN <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="contactAddress.pin"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            className="input-field"
-            aria-invalid={errors.contactAddress?.pin ? true : undefined}
-            {...register("contactAddress.pin")}
-          />
-          <FieldError message={errors.contactAddress?.pin?.message} />
-        </div>
+          <div>
+            <label
+              htmlFor="contactAddress.address.pin"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              PIN Code <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contactAddress.address.pin"
+              type="text"
+              maxLength={6}
+              className="input-field"
+              aria-invalid={errors.contactAddress?.address?.pin ? true : undefined}
+              {...register("contactAddress.address.pin")}
+            />
+            <FieldError message={errors.contactAddress?.address?.pin?.message} />
+          </div>
 
-        <div className="sm:col-span-2">
-          <label
-            htmlFor="contactAddress.state"
-            className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
-          >
-            State <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="contactAddress.state"
-            className="input-field"
-            aria-invalid={errors.contactAddress?.state ? true : undefined}
-            {...register("contactAddress.state")}
-          >
-            <option value="" disabled>
-              Select state
-            </option>
-            {INDIAN_STATES.map((state) => (
-              <option key={state.code} value={state.name}>
-                {state.name}
-              </option>
-            ))}
-          </select>
-          <FieldError message={errors.contactAddress?.state?.message} />
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="contactAddress.address.state"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-foreground)]"
+            >
+              State <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="contactAddress.address.state"
+              className="input-field"
+              aria-invalid={errors.contactAddress?.address?.state ? true : undefined}
+              {...register("contactAddress.address.state")}
+            >
+              <option value="" disabled>Select State</option>
+              {INDIAN_STATES.map((state) => (
+                <option key={state.code} value={state.name}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+            <FieldError message={errors.contactAddress?.address?.state?.message} />
+          </div>
         </div>
       </div>
     </div>

@@ -18,7 +18,8 @@ import { Step3Contact } from "./steps/Step3Contact";
 import { Step4Bank } from "./steps/Step4Bank";
 import { Step5Fee } from "./steps/Step5Fee";
 import { Step6YearWiseFees } from "./steps/Step6YearWiseFees";
-import { Step7Documents } from "./steps/Step7Documents";
+import { Step7Family } from "./steps/Step7Family";
+import { Step8Documents } from "./steps/Step8Documents";
 import { StepReview } from "./steps/StepReview";
 import {
   buildDefaultFormValues,
@@ -36,6 +37,7 @@ interface ApplicationWizardProps {
     fullName: string;
     countryCode: string;
     mobile: string;
+    email?: string;
   };
 }
 
@@ -173,14 +175,16 @@ export function ApplicationWizard({
       case 6:
         return <Step6YearWiseFees />;
       case 7:
+        return <Step7Family />;
+      case 8:
         return (
-          <Step7Documents
+          <Step8Documents
             applicationId={application.id}
             documents={documents}
             onDocumentUploaded={handleDocumentUploaded}
           />
         );
-      case 8:
+      case 9:
         return (
           <StepReview
             documents={documents}
@@ -266,7 +270,7 @@ export function ApplicationWizard({
 
           {renderStep()}
 
-          {currentStep < 8 ? (
+          {currentStep < 9 ? (
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-between">
               <button
                 type="button"
@@ -281,18 +285,18 @@ export function ApplicationWizard({
               <button
                 type="button"
                 onClick={() =>
-                  void goToStep(Math.min(8, currentStep + 1) as WizardStepId)
+                  void goToStep(Math.min(9, currentStep + 1) as WizardStepId)
                 }
                 className="btn-primary"
               >
-                {currentStep === 7 ? "Review Application" : "Save & Continue"}
+                {currentStep === 8 ? "Review Application" : "Save & Continue"}
               </button>
             </div>
           ) : (
             <div className="mt-8 border-t border-border pt-6">
               <button
                 type="button"
-                onClick={() => setCurrentStep(7)}
+                onClick={() => setCurrentStep(8)}
                 className="btn-secondary"
               >
                 Back to Documents
@@ -306,27 +310,29 @@ export function ApplicationWizard({
 }
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
-  if (status === "idle") {
-    return null;
+  switch (status) {
+    case "saving":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+          Saving draft...
+        </span>
+      );
+    case "saved":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Draft saved
+        </span>
+      );
+    case "error":
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs text-red-600 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+          Failed to save draft
+        </span>
+      );
+    default:
+      return null;
   }
-
-  const label =
-    status === "saving"
-      ? "Saving..."
-      : status === "saved"
-        ? "Saved"
-        : "Save failed";
-
-  const className =
-    status === "error"
-      ? "text-red-600"
-      : status === "saving"
-        ? "text-muted-foreground"
-        : "text-emerald-700";
-
-  return (
-    <p className={`text-sm font-medium ${className}`} aria-live="polite">
-      {label}
-    </p>
-  );
 }

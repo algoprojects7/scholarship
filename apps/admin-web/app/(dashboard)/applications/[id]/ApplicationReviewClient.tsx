@@ -32,6 +32,7 @@ type TabId =
   | "contact"
   | "bank"
   | "fees"
+  | "family"
   | "documents"
   | "history";
 
@@ -41,6 +42,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "contact", label: "Contact" },
   { id: "bank", label: "Bank" },
   { id: "fees", label: "Fees" },
+  { id: "family", label: "Family" },
   { id: "documents", label: "Documents" },
   { id: "history", label: "History" },
 ];
@@ -1019,6 +1021,10 @@ export function ApplicationReviewClient({
                 value={application.personalDetails?.studentName}
               />
               <ReadOnlyField
+                label="Gender"
+                value={application.personalDetails?.gender}
+              />
+              <ReadOnlyField
                 label="Father's Name"
                 value={application.personalDetails?.fatherName}
               />
@@ -1038,26 +1044,49 @@ export function ApplicationReviewClient({
                 label="Religion"
                 value={application.personalDetails?.religion}
               />
+              <ReadOnlyField
+                label="Caste"
+                value={application.personalDetails?.caste}
+              />
             </ReadOnlySection>
           ) : null}
 
           {activeTab === "education" ? (
             <ReadOnlySection title="Educational Details">
               <ReadOnlyField
-                label="Reading Year"
-                value={application.educationalDetails?.readingYear}
-              />
-              <ReadOnlyField
-                label="Institution"
-                value={application.educationalDetails?.institutionName}
-              />
-              <ReadOnlyField
-                label="Course"
+                label="Course Name"
                 value={application.educationalDetails?.courseName}
+              />
+              <ReadOnlyField
+                label="Duration"
+                value={application.educationalDetails?.duration}
               />
               <ReadOnlyField
                 label="Batch"
                 value={application.educationalDetails?.batch}
+              />
+              <ReadOnlyField
+                label="Roll Number"
+                value={application.educationalDetails?.rollNumber}
+              />
+              <ReadOnlyField
+                label="Current Semester"
+                value={application.educationalDetails?.currentSemester}
+              />
+              <ReadOnlyField
+                label="Institute Name & Address"
+                value={
+                  application.educationalDetails?.instituteNameWithAddress ??
+                  application.educationalDetails?.institutionName
+                }
+              />
+              <ReadOnlyField
+                label="Date of Course Completion"
+                value={application.educationalDetails?.dateOfCourseCompletion}
+              />
+              <ReadOnlyField
+                label="Accommodation"
+                value={application.educationalDetails?.residenceType}
               />
             </ReadOnlySection>
           ) : null}
@@ -1065,32 +1094,69 @@ export function ApplicationReviewClient({
           {activeTab === "contact" ? (
             <ReadOnlySection title="Contact & Address">
               <ReadOnlyField
-                label="Mobile"
+                label="Student Mobile"
                 value={
-                  application.contactAddress?.mobile
-                    ? `${application.contactAddress.countryCode ?? "+91"} ${application.contactAddress.mobile}`
+                  application.contactAddress?.student?.mobile
+                    ? `${application.contactAddress.student.countryCode ?? "+91"} ${application.contactAddress.student.mobile}`
+                    : application.contactAddress?.mobile
+                      ? `+91 ${application.contactAddress.mobile}`
+                      : undefined
+                }
+              />
+              <ReadOnlyField
+                label="Student Email"
+                value={application.contactAddress?.student?.email}
+              />
+              <ReadOnlyField
+                label="WhatsApp"
+                value={
+                  application.contactAddress?.student?.whatsapp
+                    ? `+91 ${application.contactAddress.student.whatsapp}`
                     : undefined
                 }
               />
               <ReadOnlyField
-                label="Village"
-                value={application.contactAddress?.village}
+                label="Guardian Mobile"
+                value={
+                  application.contactAddress?.guardian?.mobile
+                    ? `${application.contactAddress.guardian.countryCode ?? "+91"} ${application.contactAddress.guardian.mobile}`
+                    : undefined
+                }
+              />
+              <ReadOnlyField
+                label="Village / Town"
+                value={
+                  application.contactAddress?.address?.villageTown ??
+                  application.contactAddress?.village
+                }
               />
               <ReadOnlyField
                 label="P.O."
-                value={application.contactAddress?.po}
+                value={
+                  application.contactAddress?.address?.po ??
+                  application.contactAddress?.po
+                }
               />
               <ReadOnlyField
                 label="District"
-                value={application.contactAddress?.district}
+                value={
+                  application.contactAddress?.address?.district ??
+                  application.contactAddress?.district
+                }
               />
               <ReadOnlyField
                 label="PIN"
-                value={application.contactAddress?.pin}
+                value={
+                  application.contactAddress?.address?.pin ??
+                  application.contactAddress?.pin
+                }
               />
               <ReadOnlyField
                 label="State"
-                value={application.contactAddress?.state}
+                value={
+                  application.contactAddress?.address?.state ??
+                  application.contactAddress?.state
+                }
               />
             </ReadOnlySection>
           ) : null}
@@ -1116,6 +1182,40 @@ export function ApplicationReviewClient({
               <ReadOnlyField
                 label="IFSC Code"
                 value={application.bankDetails?.ifscCode}
+              />
+            </ReadOnlySection>
+          ) : null}
+
+          {activeTab === "family" ? (
+            <ReadOnlySection title="Family Details">
+              <ReadOnlyField
+                label="Family Members"
+                value={
+                  application.familyDetails?.members
+                    ? `${application.familyDetails.members.length} members`
+                    : "—"
+                }
+              />
+              {application.familyDetails?.members?.map((member, idx) => (
+                <div key={idx} className="col-span-full border-t border-admin-border pt-2 text-xs">
+                  <span className="font-semibold text-admin-fg">Member #{idx + 1}:</span> {member.name} ({member.relation}, {member.gender}) — {member.qualification}, {member.occupation}
+                </div>
+              ))}
+              <ReadOnlyField
+                label="Family Monthly Income"
+                value={
+                  application.familyDetails?.familyMonthlyIncome !== undefined
+                    ? formatCurrency(application.familyDetails.familyMonthlyIncome)
+                    : "—"
+                }
+              />
+              <ReadOnlyField
+                label="Family Monthly Expense"
+                value={
+                  application.familyDetails?.familyMonthlyExpense !== undefined
+                    ? formatCurrency(application.familyDetails.familyMonthlyExpense)
+                    : "—"
+                }
               />
             </ReadOnlySection>
           ) : null}

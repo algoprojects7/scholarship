@@ -51,6 +51,10 @@ export class UpdateApplicationDto {
   feeDetails?: FeeDetailsDto;
 
   @IsOptional()
+  @IsObject()
+  familyDetails?: Record<string, unknown>;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FeePaymentDto)

@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ApplicationStatus, DocumentType } from '@scholarship/shared';
+import { DocumentType as PrismaDocumentType } from '@scholarship/database';
 import {
   ALLOWED_DOCUMENT_MIMES,
   MAX_DOCUMENT_SIZE_BYTES,
@@ -334,7 +335,7 @@ export class DocumentsService {
 
   private async saveDocumentRecord(
     applicationId: string,
-    documentType: DocumentType,
+    documentType: PrismaDocumentType,
     fileName: string,
     key: string,
     fileSize: number,
@@ -394,7 +395,7 @@ export class DocumentsService {
     }
 
     if (
-      documentType === DocumentType.PHOTO &&
+      documentType === DocumentType.FULL_PHOTO_WITH_APRON &&
       mimeType === 'application/pdf'
     ) {
       throw new BadRequestException('Photo must be JPG or PNG');

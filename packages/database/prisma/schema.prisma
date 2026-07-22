@@ -33,13 +33,33 @@ enum ApplicationStatus {
   ALLOCATED
 }
 
+enum Caste {
+  GEN
+  SC
+  ST_P
+  ST_H
+  OBC
+  MOBC
+}
+
+enum ResidenceType {
+  HOSTELER
+  DAY_SCHOLAR
+}
+
 enum DocumentType {
-  AADHAAR
+  STUDENT_ID_CARD
+  ADMISSION_RECEIPT
+  AADHAAR_STUDENT
+  VOTER_ID_STUDENT
+  NRC_FINAL_DRAFT
+  BANK_ACCOUNT_DETAILS
+  PARENT_AADHAAR
+  FULL_PHOTO_WITH_APRON
+  COURSE_YEARLY_EXPENSE
+  HOSTEL_PAYMENT_RECEIPT
+  BPL_CERTIFICATE
   INCOME_CERTIFICATE
-  MARKSHEET
-  BANK_PASSBOOK
-  FEE_RECEIPT
-  PHOTO
 }
 
 enum DocumentVerificationStatus {
@@ -150,6 +170,7 @@ model Application {
   contactAddress      Json?             @map("contact_address") @db.JsonB
   bankDetails         Json?             @map("bank_details") @db.JsonB
   feeDetails          Json?             @map("fee_details") @db.JsonB
+  familyDetails       Json?             @map("family_details") @db.JsonB
   submittedAt         DateTime?         @map("submitted_at") @db.Timestamptz(6)
   reviewedAt          DateTime?         @map("reviewed_at") @db.Timestamptz(6)
   reviewedById        String?           @map("reviewed_by") @db.Uuid

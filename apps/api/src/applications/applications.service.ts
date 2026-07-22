@@ -17,27 +17,24 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 
 const PERSONAL_FIELDS = [
   'studentName',
+  'gender',
   'fatherName',
   'fatherProfession',
   'motherName',
   'motherProfession',
   'religion',
+  'caste',
 ] as const;
 
 const EDUCATIONAL_FIELDS = [
-  'readingYear',
-  'institutionName',
   'courseName',
+  'duration',
   'batch',
-] as const;
-
-const CONTACT_FIELDS = [
-  'mobile',
-  'village',
-  'po',
-  'district',
-  'pin',
-  'state',
+  'rollNumber',
+  'currentSemester',
+  'instituteNameWithAddress',
+  'dateOfCourseCompletion',
+  'residenceType',
 ] as const;
 
 const BANK_FIELDS = [
@@ -136,9 +133,16 @@ export class ApplicationsService {
     }
 
     if (dto.bankDetails !== undefined) {
+      const bankData = { ...dto.bankDetails };
+      if (typeof bankData.accountHolder === 'string') {
+        bankData.accountHolder = bankData.accountHolder.toUpperCase();
+      }
+      if (typeof bankData.ifscCode === 'string') {
+        bankData.ifscCode = bankData.ifscCode.toUpperCase();
+      }
       updateData.bankDetails = this.mergeJsonSection(
         application.bankDetails,
-        dto.bankDetails,
+        bankData,
       );
     }
 
@@ -146,6 +150,13 @@ export class ApplicationsService {
       updateData.feeDetails = this.mergeJsonSection(
         application.feeDetails,
         { paymentType: dto.feeDetails.paymentType },
+      );
+    }
+
+    if (dto.familyDetails !== undefined) {
+      updateData.familyDetails = this.mergeJsonSection(
+        application.familyDetails,
+        dto.familyDetails,
       );
     }
 
@@ -255,6 +266,7 @@ export class ApplicationsService {
     contactAddress: Prisma.JsonValue | null;
     bankDetails: Prisma.JsonValue | null;
     feeDetails: Prisma.JsonValue | null;
+    familyDetails: Prisma.JsonValue | null;
     feePayments: { year: number; amountPaid: Prisma.Decimal }[];
   }): void {
     const missing: string[] = [];
@@ -267,7 +279,7 @@ export class ApplicationsService {
       missing.push('educational details');
     }
 
-    if (!this.hasFields(application.contactAddress, CONTACT_FIELDS)) {
+    if (!application.contactAddress) {
       missing.push('contact & address');
     }
 
@@ -278,6 +290,17 @@ export class ApplicationsService {
     const feeDetails = this.asRecord(application.feeDetails);
     if (!feeDetails?.paymentType) {
       missing.push('fee details (payment type)');
+    }
+
+    const familyDetails = this.asRecord(application.familyDetails);
+    if (
+      !familyDetails ||
+      !Array.isArray(familyDetails.members) ||
+      familyDetails.members.length === 0 ||
+      familyDetails.familyMonthlyIncome === undefined ||
+      familyDetails.familyMonthlyExpense === undefined
+    ) {
+      missing.push('family details');
     }
 
     const paymentYears = new Set(application.feePayments.map((p) => p.year));

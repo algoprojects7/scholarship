@@ -32,7 +32,7 @@ function findEditableDraft(applications: Application[]): Application | null {
 export function ApplicationPageClient() {
   const [application, setApplication] = useState<Application | null>(null);
   const [profile, setProfile] = useState<
-    { fullName: string; countryCode: string; mobile: string } | undefined
+    { fullName: string; countryCode: string; mobile: string; email?: string } | undefined
   >();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +54,12 @@ export function ApplicationPageClient() {
           return;
         }
 
-        setProfile(meResponse.user.profile);
+        setProfile({
+          fullName: meResponse.user.profile?.fullName ?? "",
+          countryCode: meResponse.user.profile?.countryCode ?? "+91",
+          mobile: meResponse.user.profile?.mobile ?? "",
+          email: meResponse.user.email ?? "",
+        });
 
         let draft = findEditableDraft(myApplications);
 

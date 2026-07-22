@@ -3,28 +3,58 @@ import { ApiError, apiFetch, apiFetchFormData } from "./api";
 
 export interface PersonalDetails {
   studentName: string;
+  gender: string;
   fatherName: string;
   fatherProfession: string;
   motherName: string;
   motherProfession: string;
   religion: string;
+  caste: string;
 }
 
 export interface EducationalDetails {
-  readingYear: string;
-  institutionName: string;
   courseName: string;
+  duration: string;
   batch: string;
+  rollNumber: string;
+  currentSemester: string;
+  instituteNameWithAddress: string;
+  dateOfCourseCompletion: string;
+  residenceType: string;
 }
 
 export interface ContactAddress {
-  countryCode: "+91";
-  mobile: string;
-  village: string;
-  po: string;
-  district: string;
-  pin: string;
-  state: string;
+  student: {
+    countryCode: string;
+    mobile: string;
+    email: string;
+    whatsapp?: string;
+  };
+  guardian: {
+    countryCode: string;
+    mobile: string;
+  };
+  address: {
+    villageTown: string;
+    po: string;
+    district: string;
+    pin: string;
+    state: string;
+  };
+}
+
+export interface FamilyMember {
+  name: string;
+  gender: string;
+  relation: string;
+  qualification: string;
+  occupation: string;
+}
+
+export interface FamilyDetails {
+  members: FamilyMember[];
+  familyMonthlyIncome: number;
+  familyMonthlyExpense: number;
 }
 
 export interface BankDetails {
@@ -66,6 +96,7 @@ export interface Application {
   bankDetails?: BankDetails | null;
   feeDetails?: FeeDetails | null;
   feePayments?: FeePayment[];
+  familyDetails?: FamilyDetails | null;
   documents?: ApplicationDocument[];
   submittedAt?: string | null;
   createdAt: string;
@@ -73,12 +104,13 @@ export interface Application {
 }
 
 export interface UpdateApplicationPayload {
-  personalDetails?: PersonalDetails;
-  educationalDetails?: EducationalDetails;
-  contactAddress?: ContactAddress;
-  bankDetails?: BankDetails;
-  feeDetails?: FeeDetails;
+  personalDetails?: Record<string, any>;
+  educationalDetails?: Record<string, any>;
+  contactAddress?: Record<string, any>;
+  bankDetails?: Record<string, any>;
+  feeDetails?: Record<string, any>;
   feePayments?: FeePayment[];
+  familyDetails?: Record<string, any>;
 }
 
 export interface SubmitApplicationResponse {

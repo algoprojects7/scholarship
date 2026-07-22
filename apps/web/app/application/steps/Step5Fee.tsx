@@ -1,9 +1,15 @@
 "use client";
 
+import { PaymentType } from "@scholarship/shared";
 import { useFormContext } from "react-hook-form";
-import type { ApplicationFormValues } from "../schemas";
-import { PAYMENT_TYPE_OPTIONS } from "../schemas";
 import { FieldError, StepHeading } from "../components/FormHelpers";
+import type { ApplicationFormValues } from "../schemas";
+
+const PAYMENT_TYPE_OPTIONS = [
+  { value: PaymentType.YEARLY, label: "Yearly" },
+  { value: PaymentType.SEMESTER, label: "Semester" },
+  { value: PaymentType.ONE_TIME, label: "One Time" },
+];
 
 export function Step5Fee() {
   const {

@@ -107,17 +107,32 @@ export interface ListAdminApplicationsParams {
   academicYear?: string;
 }
 
+export interface FamilyMember {
+  name: string;
+  gender: string;
+  relation: string;
+  qualification: string;
+  occupation: string;
+}
+
+export interface FamilyDetails {
+  members: FamilyMember[];
+  familyMonthlyIncome: number;
+  familyMonthlyExpense: number;
+}
+
 export interface AdminApplication {
   id: string;
   status: ApplicationStatus;
   academicYear: string;
   applicationNumber?: string | null;
-  personalDetails?: PersonalDetails | null;
-  educationalDetails?: EducationalDetails | null;
-  contactAddress?: ContactAddress | null;
+  personalDetails?: any | null;
+  educationalDetails?: any | null;
+  contactAddress?: any | null;
   bankDetails?: BankDetails | null;
   feeDetails?: FeeDetails | null;
   feePayments?: FeePayment[];
+  familyDetails?: FamilyDetails | null;
   documents?: AdminApplicationDocument[];
   remarks?: AdminApplicationRemark[];
   student?: AdminApplicationStudent | null;
