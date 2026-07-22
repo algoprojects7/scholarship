@@ -223,9 +223,9 @@ export function SecurityPuzzle({
           </div>
         </div>
 
-        {/* Curved Dashed Arrow Line (Contained Length Pointing Into Target Silhouette Slot) */}
+        {/* Curved Dashed Arrow Line (Visible on Desktop Only - Hidden on Mobile View) */}
         {!isSolved && (
-          <div className="absolute left-[125px] sm:left-[145px] bottom-[20px] sm:bottom-[25px] w-36 sm:w-44 h-24 sm:h-28 pointer-events-none z-40">
+          <div className="hidden md:block absolute left-[125px] sm:left-[145px] bottom-[20px] sm:bottom-[25px] w-36 sm:w-44 h-24 sm:h-28 pointer-events-none z-40">
             <svg className="w-full h-full filter drop-shadow" viewBox="0 0 170 100">
               {/* Curved dashed line extending from left card smoothly pointing directly into target slot */}
               <path
