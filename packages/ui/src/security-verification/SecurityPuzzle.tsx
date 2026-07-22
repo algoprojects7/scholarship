@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { RHINO_IMAGE_BASE64, LANDSCAPE_IMAGE_BASE64 } from "./assets";
 
 interface SecurityPuzzleProps {
   captchaId?: string;
@@ -14,7 +15,7 @@ function RhinoFigure({ className = "h-28 w-36 sm:h-32 sm:w-40 object-contain dro
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/images/security_puzzle_rhino.png"
+      src={RHINO_IMAGE_BASE64}
       alt="Real Indian One-Horned Rhinoceros"
       className={className}
       draggable={false}
@@ -254,7 +255,7 @@ export function SecurityPuzzle({
           {/* Real Landscape Background Image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/security_puzzle_landscape.png"
+            src={LANDSCAPE_IMAGE_BASE64}
             alt="Landscape Security Target"
             className="absolute inset-0 h-full w-full object-cover select-none"
             draggable={false}
@@ -270,7 +271,7 @@ export function SecurityPuzzle({
                   {/* Exact 1-to-1 Rhino Silhouette Mask */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/images/security_puzzle_rhino.png"
+                    src={RHINO_IMAGE_BASE64}
                     alt="Rhino Target Silhouette"
                     className="h-full w-full object-contain opacity-30 grayscale brightness-75 contrast-125 select-none"
                     draggable={false}
