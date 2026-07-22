@@ -60,6 +60,13 @@ enum DocumentType {
   HOSTEL_PAYMENT_RECEIPT
   BPL_CERTIFICATE
   INCOME_CERTIFICATE
+
+  // Legacy variants retained for database compatibility
+  AADHAAR
+  MARKSHEET
+  BANK_PASSBOOK
+  FEE_RECEIPT
+  PHOTO
 }
 
 enum DocumentVerificationStatus {

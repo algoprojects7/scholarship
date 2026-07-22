@@ -50,6 +50,12 @@ export enum DocumentType {
   HOSTEL_PAYMENT_RECEIPT = 'HOSTEL_PAYMENT_RECEIPT',
   BPL_CERTIFICATE = 'BPL_CERTIFICATE',
   INCOME_CERTIFICATE = 'INCOME_CERTIFICATE',
+  // Legacy variants retained for database compatibility
+  AADHAAR = 'AADHAAR',
+  MARKSHEET = 'MARKSHEET',
+  BANK_PASSBOOK = 'BANK_PASSBOOK',
+  FEE_RECEIPT = 'FEE_RECEIPT',
+  PHOTO = 'PHOTO',
 }
 
 export enum DocumentVerificationStatus {
