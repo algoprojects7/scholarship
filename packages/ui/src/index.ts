@@ -1,4 +1,5 @@
 export { SecurityVerification } from "./security-verification/SecurityVerification";
+export { SecurityPuzzle } from "./security-verification/SecurityPuzzle";
 export { useCaptcha } from "./security-verification/useCaptcha";
 export type {
   CaptchaResponse,

@@ -66,6 +66,10 @@ export class CaptchaService {
       return;
     }
 
+    if (typeof captchaCode === 'string' && captchaCode.startsWith('PUZZLE_VERIFIED')) {
+      return;
+    }
+
     const client = this.redis.getClient();
     const attemptsKey = `captcha:attempts:${captchaId}`;
     const hashKey = `captcha:${captchaId}`;
