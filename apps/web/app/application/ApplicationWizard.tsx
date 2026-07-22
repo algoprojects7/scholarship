@@ -38,6 +38,7 @@ interface ApplicationWizardProps {
     countryCode: string;
     mobile: string;
     email?: string;
+    gender?: string;
   };
 }
 

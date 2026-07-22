@@ -32,7 +32,7 @@ export const STEP_FIELD_GROUPS: Record<
 
 export function buildDefaultFormValues(
   application: Application,
-  profile?: { fullName: string; countryCode: string; mobile: string; email?: string },
+  profile?: { fullName: string; countryCode: string; mobile: string; email?: string; gender?: string },
 ): ApplicationFormValues {
   const feePaymentsMap = new Map(
     (application.feePayments ?? []).map((payment) => [
@@ -50,7 +50,7 @@ export function buildDefaultFormValues(
   return {
     personalDetails: {
       studentName: personalData?.studentName ?? profile?.fullName ?? "",
-      gender: personalData?.gender ?? "MALE",
+      gender: personalData?.gender ?? (profile?.gender as any) ?? "MALE",
       fatherName: personalData?.fatherName ?? "",
       fatherProfession: personalData?.fatherProfession ?? "",
       motherName: personalData?.motherName ?? "",
